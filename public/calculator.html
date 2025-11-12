@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Калькулятор бюджета</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --orange: #FF6B35;
+            --orange-light: #FF8C61;
+            --dark-bg: #1A1A1A;
+            --card-bg: #2D2D2D;
+            --gray: #9E9E9E;
+            --white: #FFFFFF;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--dark-bg);
+            color: var(--white);
+            padding: 20px;
+            padding-bottom: 100px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: var(--gray);
+            margin-bottom: 32px;
+        }
+
+        .section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 2px solid transparent;
+            transition: border-color 0.3s;
+        }
+
+        .section:hover {
+            border-color: rgba(255, 107, 53, 0.3);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--white);
+        }
+
+        .option {
+            background: var(--dark-bg);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option:active {
+            transform: scale(0.98);
+        }
+
+        .option.selected {
+            border-color: var(--orange);
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .option-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .option-content {
+            flex: 1;
+        }
+
+        .option-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--white);
+        }
+
+        .option-subtitle {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .price-badge {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--orange);
+            flex-shrink: 0;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .checkbox-option {
+            background: var(--dark-bg);
+            border: 2px solid #3D3D3D;
+            border-radius: 12px;
+            padding: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .checkbox-option:active {
+            transform: scale(0.98);
+        }
+
+        .checkbox-option.selected {
+            border-color: var(--orange);
+            background: rgba(255, 107, 53, 0.1);
+        }
+
+        .checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #3D3D3D;
+            border-radius: 6px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .checkbox-option.selected .checkbox {
+            background: var(--orange);
+            border-color: var(--orange);
+        }
+
+        .checkbox-option.selected .checkbox::after {
+            content: '✓';
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .total-section {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card-bg);
+            border-top: 2px solid var(--orange);
+            padding: 20px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .total-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .total-label {
+            font-size: 14px;
+            color: var(--gray);
+        }
+
+        .total-amount {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--orange) 0%, var(--orange-light) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .discount-label {
+            font-size: 13px;
+            color: #10b981;
+            font-weight: 600;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.15);
+            border: 2px solid #ef4444;
+            color: #fca5a5;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section {
+            animation: fadeInUp 0.4s ease-out forwards;
+            opacity: 0;
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.3s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💰 Калькулятор бюджета</h1>
+        <p class="subtitle">Выберите параметры размещения</p>
+
+        <div class="error-message" id="errorMessage">
+            ⚠️ Выберите хотя бы одну платформу
+        </div>
+
+        <!-- ФОРМАТ -->
+        <div class="section">
+            <div class="section-title">📺 Формат размещения</div>
+            <div class="option selected" data-type="format" data-value="ad">
+                <div class="option-icon">📢</div>
+                <div class="option-content">
+                    <div class="option-text">Готовый ролик</div>
+                    <div class="option-subtitle">У вас есть видео</div>
+                </div>
+            </div>
+            <div class="option" data-type="format" data-value="production">
+                <div class="option-icon">🎬</div>
+                <div class="option-content">
+                    <div class="option-text">Производство</div>
+                    <div class="option-subtitle">Нужно снять ролик/фильм</div>
+                </div>
+            </div>
+            <div class="option" data-type="format" data-value="blogger">
+                <div class="option-icon">👤</div>
+                <div class="option-content">
+                    <div class="option-text">Блогерская интеграция</div>
+                    <div class="option-subtitle">Нативное размещение</div>
+                </div>
+            </div>
+            <div class="option" data-type="format" data-value="combo">
+                <div class="option-icon">🔥</div>
+                <div class="option-content">
+                    <div class="option-text">Всё и сразу (КОМБО)</div>
+                    <div class="option-subtitle">Производство + размещение + блогеры</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ПЛАТФОРМЫ -->
+        <div class="section">
+            <div class="section-title">📱 Платформы</div>
+            <div class="checkbox-group">
+                <div class="checkbox-option selected" data-type="platform" data-value="air">
+                    <div class="checkbox"></div>
+                    <div class="option-content">
+                        <div class="option-text">📺 Эфир ТВ</div>
+                        <div class="option-subtitle">950 000 зрителей/неделя</div>
+                    </div>
+                </div>
+                <div class="checkbox-option" data-type="platform" data-value="youtube">
+                    <div class="checkbox"></div>
+                    <div class="option-content">
+                        <div class="option-text">▶️ YouTube</div>
+                        <div class="option-subtitle">630 000 подписчиков</div>
+                    </div>
+                </div>
+                <div class="checkbox-option" data-type="platform" data-value="vk">
+                    <div class="checkbox"></div>
+                    <div class="option-content">
+                        <div class="option-text">💬 VK</div>
+                        <div class="option-subtitle">280 000 подписчиков</div>
+                    </div>
+                </div>
+                <div class="checkbox-option" data-type="platform" data-value="site">
+                    <div class="checkbox"></div>
+                    <div class="option-content">
+                        <div class="option-text">🌐 Сайт + соцсети</div>
+                        <div class="option-subtitle">Статья + посты (90К/месяц)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ПАКЕТ -->
+        <div class="section">
+            <div class="section-title">📦 Пакет размещения</div>
+            <div class="option selected" data-type="package" data-value="S">
+                <div class="option-icon">📦</div>
+                <div class="option-content">
+                    <div class="option-text">Пакет S — Старт</div>
+                    <div class="option-subtitle">1 месяц, базовый охват</div>
+                </div>
+                <div class="price-badge" id="priceS">150 000 ₽</div>
+            </div>
+            <div class="option" data-type="package" data-value="M">
+                <div class="option-icon">📦📦</div>
+                <div class="option-content">
+                    <div class="option-text">Пакет M — Профи</div>
+                    <div class="option-subtitle">3 месяца, повышенный охват</div>
+                </div>
+                <div class="price-badge" id="priceM">400 000 ₽</div>
+            </div>
+            <div class="option" data-type="package" data-value="L">
+                <div class="option-icon">📦📦📦</div>
+                <div class="option-content">
+                    <div class="option-text">Пакет L — Максимум</div>
+                    <div class="option-subtitle">6 месяцев, максимальный охват</div>
+                </div>
+                <div class="price-badge" id="priceL">700 000 ₽</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ИТОГО -->
+    <div class="total-section">
+        <div class="total-content">
+            <div class="total-row">
+                <span class="total-label">Итого:</span>
+                <span class="total-amount" id="totalAmount">150 000 ₽</span>
+            </div>
+            <div class="total-row" id="discountRow" style="display: none;">
+                <span class="discount-label">💚 Скидка 10% за комбо!</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.ready();
+        tg.expand();
+        tg.MainButton.setText('Отправить расчёт');
+        tg.MainButton.show();
+
+        let selected = {
+            format: 'ad',
+            platforms: ['air'],
+            package: 'S'
+        };
+
+        const prices = {
+            ad: { S: 150000, M: 400000, L: 700000 },
+            production: { S: 250000, M: 650000, L: 1200000 },
+            blogger: { S: 200000, M: 500000, L: 900000 },
+            combo: { S: 450000, M: 1200000, L: 2200000 }
+        };
+
+        const platformMultipliers = {
+            air: 1.0,
+            youtube: 0.3,
+            vk: 0.25,
+            site: 0.15
+        };
+
+        function calculatePrice() {
+            const basePrice = prices[selected.format][selected.package];
+            
+            let platformMultiplier = 0;
+            selected.platforms.forEach(p => {
+                platformMultiplier += platformMultipliers[p];
+            });
+
+            let total = Math.round(basePrice * platformMultiplier);
+            
+            // Скидка 10% за комбо
+            if (selected.format === 'combo') {
+                total = Math.round(total * 0.9);
+                document.getElementById('discountRow').style.display = 'flex';
+            } else {
+                document.getElementById('discountRow').style.display = 'none';
+            }
+
+            document.getElementById('totalAmount').textContent = total.toLocaleString('ru-RU') + ' ₽';
+
+            // Обновляем цены пакетов
+            ['S', 'M', 'L'].forEach(pkg => {
+                const price = Math.round(prices[selected.format][pkg] * platformMultiplier);
+                const discount = selected.format === 'combo' ? Math.round(price * 0.9) : price;
+                document.getElementById('price' + pkg).textContent = discount.toLocaleString('ru-RU') + ' ₽';
+            });
+        }
+
+        // Форматы (radio)
+        document.querySelectorAll('[data-type="format"]').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('[data-type="format"]').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                selected.format = option.dataset.value;
+                tg.HapticFeedback.impactOccurred('light');
+                calculatePrice();
+            });
+        });
+
+        // Платформы (checkbox)
+        document.querySelectorAll('[data-type="platform"]').forEach(option => {
+            option.addEventListener('click', () => {
+                option.classList.toggle('selected');
+                const value = option.dataset.value;
+                
+                if (option.classList.contains('selected')) {
+                    selected.platforms.push(value);
+                } else {
+                    selected.platforms = selected.platforms.filter(p => p !== value);
+                }
+                
+                tg.HapticFeedback.impactOccurred('light');
+                
+                if (selected.platforms.length === 0) {
+                    document.getElementById('errorMessage').classList.add('show');
+                    tg.MainButton.hide();
+                } else {
+                    document.getElementById('errorMessage').classList.remove('show');
+                    tg.MainButton.show();
+                    calculatePrice();
+                }
+            });
+        });
+
+        // Пакеты (radio)
+        document.querySelectorAll('[data-type="package"]').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('[data-type="package"]').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                selected.package = option.dataset.value;
+                tg.HapticFeedback.impactOccurred('light');
+                calculatePrice();
+            });
+        });
+
+        // Отправка данных
+        tg.MainButton.onClick(() => {
+            if (selected.platforms.length === 0) {
+                tg.showAlert('Выберите хотя бы одну платформу!');
+                return;
+            }
+
+            tg.HapticFeedback.notificationOccurred('success');
+            
+            const data = {
+                format: selected.format,
+                platforms: selected.platforms,
+                package: selected.package,
+                total: document.getElementById('totalAmount').textContent,
+                userId: tg.initDataUnsafe?.user?.id || null
+            };
+
+            tg.sendData(JSON.stringify(data));
+            tg.close();
+        });
+
+        // Инициализация
+        calculatePrice();
+    </script>
+</body>
+</html>
