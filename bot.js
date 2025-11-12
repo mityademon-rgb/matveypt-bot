@@ -409,29 +409,23 @@ bot.on('message', async (msg) => {
   }
   
   if (text === '💰 Посчитать бюджет') {
-    const session = sessions.get(chatId);
-    
-    if (!session || !session.contactShared) {
-      await bot.sendMessage(chatId, 'Сначала давайте познакомимся! Напишите /start 😊');
-      return;
-    }
-    
-    const keyboard = {
-      inline_keyboard: [[
-        { 
-          text: '🧮 Открыть калькулятор',
-          web_app: { 
-            url: `${process.env.WEB_APP_URL}/calculator.html`
-          }
+  const keyboard = {
+    inline_keyboard: [[
+      { 
+        text: '🧮 Открыть калькулятор',
+        web_app: { 
+          url: `${process.env.WEB_APP_URL}/calculator.html`
         }
-      ]]
-    };
-    
-    await bot.sendMessage(chatId, '💰 Калькулятор бюджета — открывайте! 👇', {
-      reply_markup: keyboard
-    });
-    return;
-  }
+      }
+    ]]
+  };
+  
+  await bot.sendMessage(chatId, '💰 Калькулятор бюджета — открывайте! 👇', {
+    reply_markup: keyboard
+  });
+  return;
+}
+
   
   if (text === '📞 Связаться с менеджером') {
     const keyboard = {
