@@ -306,15 +306,12 @@ bot.on('web_app_data', async (msg) => {
       return;
     }
     
-    // СОХРАНЯЕМ ВЫБОР В БРИФ
     session.brief.task = data.intent;
     sessions.set(chatId, session);
     
-    // ПОДТВЕРЖДАЕМ ВЫБОР
     const confirmMessage = `✅ Выбрано: ${data.title}\n\nОтлично! Теперь расскажите подробнее о вашем проекте:`;
     await bot.sendMessage(chatId, confirmMessage);
     
-    // УВЕДОМЛЯЕМ МЕНЕДЖЕРА
     const managerChatId = process.env.MANAGER_CHAT_ID;
     if (managerChatId) {
       const brief = session.brief;
@@ -587,11 +584,6 @@ bot.on('message', async (msg) => {
     }
     
     // КАЛЬКУЛЯТОР
-    console.log('🔍 Проверка калькулятора:', {
-      readyForCalculator: aiResponse.readyForCalculator,
-      calculatorShown: session.calculatorShown
-    });
-
     if (aiResponse.readyForCalculator === true && !session.calculatorShown) {
       session.calculatorShown = true;
       sessions.set(chatId, session);
@@ -601,59 +593,12 @@ bot.on('message', async (msg) => {
       const finalMessage = `Открывайте калькулятор 👇\n\n📊 ${process.env.WEB_APP_URL || 'http://localhost:3000'}/calculator.html\n\nВыберете формат, платформы и пакет!`;
 
       await bot.sendMessage(chatId, finalMessage);
-      console.log('✅ Ссылка на калькулятор отправлена');
       
       // УВЕДОМЛЕНИЕ МЕНЕДЖЕРУ
       const managerChatId = process.env.MANAGER_CHAT_ID;
       if (managerChatId) {
         const brief = session.brief;
-        const context = session.context.slice(-6).map(m => {
-          const role = m.role === 'user' ? '👤' : '🤖';
-          return `${role} ${m.content.substring(0, 120)}`;
-        }).join('\n\n');
-        
-        const urgentMessage = `🚨 ГОРЯЧИЙ ЛИД! 🚨
-⏰ СРОЧНО! Клиент открыл калькулятор!
-
-━━━━━━━━━━━━━━━━━━━━
-📞 КОНТАКТЫ:
-━━━━━━━━━━━━━━━━━━━━
-
-👤 ${brief.firstName || 'Не указано'}
-📱 ${brief.phone || 'НЕТ'}
-💬 @${brief.telegramUsername || 'нет'}
-🆔 ${chatId}
-
-Написать:
-https://t.me/${brief.telegramUsername || `user?id=${chatId}`}
-
-━━━━━━━━━━━━━━━━━━━━
-🎯 БРИФ:
-━━━━━━━━━━━━━━━━━━━━
-
-Задача: ${brief.task || '?'}
-Цель: ${brief.goal || '?'}
-Креатив: ${brief.creative || 'не обсуждался'}
-ЦА: ${brief.targetAudience || 'не выяснена'}
-
-━━━━━━━━━━━━━━━━━━━━
-💬 ДИАЛОГ:
-━━━━━━━━━━━━━━━━━━━━
-
-${context}
-
-━━━━━━━━━━━━━━━━━━━━
-⚡ ДЕЙСТВИЯ:
-━━━━━━━━━━━━━━━━━━━━
-
-1. ПОЗВОНИТЬ: ${brief.phone || '+74993940060'}
-2. Написать (ссылка выше)
-3. Обсудить пакет
-4. Закрыть на оплату
-
-🔥 НЕ УПУСТИТЬ!
-
-⏰ ${new Date().toLocaleTimeString('ru-RU')}`;
+        const urgentMessage = `🚨 ГОРЯЧИЙ ЛИД!\n\n👤 ${brief.firstName || 'Не указано'}\n📱 ${brief.phone || 'НЕТ'}\n💬 @${brief.telegramUsername || 'нет'}\n\n🎯 ${brief.task || '?'}\n🚀 ${brief.goal || '?'}\n\nНаписать: https://t.me/${brief.telegramUsername || `user?id=${chatId}`}\n\n🔥 ЗВОНИТЬ СРОЧНО!`;
 
         const urgentKeyboard = {
           inline_keyboard: [
@@ -672,7 +617,6 @@ ${context}
 
         try {
           await bot.sendMessage(managerChatId, urgentMessage, { reply_markup: urgentKeyboard });
-          console.log(`🚨 Критическое уведомление отправлено (клиент ${brief.firstName})`);
           
           session.managerNotifiedAt = Date.now();
           sessions.set(chatId, session);
@@ -686,12 +630,16 @@ ${context}
           
         } catch (err) {
           console.error('❌ Ошибка отправки менеджеру:', err.message);
-          
-          try {
-            const simpleMessage = `🚨 ГОРЯЧИЙ ЛИД!\n\nКлиент: ${brief.firstName}\nТелефон: ${brief.phone || 'нет'}\nTelegram: @${brief.telegramUsername || 'нет'}\n\nЗадача: ${brief.task || '?'}\nЦель: ${brief.goal || '?'}\n\nНаписать: https://t.me/${brief.telegramUsername || `user?id=${chatId}`}\n\nЗВОНИТЬ СРОЧНО!`;
-            await bot.sendMessage(managerChatId, simpleMessage);
-            console.log('✅ Упрощённое уведомление отправлено');
-          } catch (err2) {
-            console.error('❌ Даже упрощённое не отправилось:', err2.message);
-          }
-        
+        }
+      }
+    }
+    
+    sessions.set(chatId, session);
+    
+  } catch (err) {
+    console.error('Ошибка обработки сообщения:', err);
+    await bot.sendMessage(chatId, 'Произошла ошибка 😅 Попробуйте ещё раз или напишите /start');
+  }
+});
+
+console.log('🤖 Bot started!');
