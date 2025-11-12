@@ -13,6 +13,7 @@
             --card-bg: #2D2D2D;
             --gray: #9E9E9E;
             --white: #FFFFFF;
+            --green: #10b981;
         }
 
         * {
@@ -26,7 +27,7 @@
             background: var(--dark-bg);
             color: var(--white);
             padding: 20px;
-            padding-bottom: 100px;
+            padding-bottom: 120px;
             min-height: 100vh;
         }
 
@@ -42,6 +43,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            font-weight: 700;
         }
 
         .subtitle {
@@ -59,71 +61,93 @@
             transition: border-color 0.3s;
         }
 
-        .section:hover {
-            border-color: rgba(255, 107, 53, 0.3);
-        }
-
         .section-title {
             font-size: 18px;
             font-weight: 700;
             margin-bottom: 16px;
             color: var(--white);
-        }
-
-        .option {
-            background: var(--dark-bg);
-            border: 2px solid transparent;
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
         }
 
-        .option:active {
+        .badge {
+            background: var(--orange);
+            color: var(--white);
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .package-card {
+            background: var(--dark-bg);
+            border: 2px solid #3D3D3D;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .package-card:active {
             transform: scale(0.98);
         }
 
-        .option.selected {
+        .package-card.selected {
             border-color: var(--orange);
             background: rgba(255, 107, 53, 0.1);
+            box-shadow: 0 8px 24px rgba(255, 107, 53, 0.3);
         }
 
-        .option-icon {
-            font-size: 24px;
-            flex-shrink: 0;
+        .package-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
         }
 
-        .option-content {
-            flex: 1;
-        }
-
-        .option-text {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 4px;
+        .package-name {
+            font-size: 20px;
+            font-weight: 700;
             color: var(--white);
+            margin-bottom: 4px;
         }
 
-        .option-subtitle {
+        .package-price {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--orange);
+        }
+
+        .package-desc {
+            font-size: 13px;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        .package-features {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 8px;
             font-size: 13px;
             color: var(--gray);
         }
 
-        .price-badge {
+        .feature::before {
+            content: '✓';
+            color: var(--green);
+            font-weight: bold;
             font-size: 16px;
-            font-weight: 700;
-            color: var(--orange);
-            flex-shrink: 0;
-        }
-
-        .checkbox-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
         }
 
         .checkbox-option {
@@ -131,6 +155,7 @@
             border: 2px solid #3D3D3D;
             border-radius: 12px;
             padding: 16px;
+            margin-bottom: 12px;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
@@ -171,6 +196,37 @@
             font-weight: bold;
         }
 
+        .option-content {
+            flex: 1;
+        }
+
+        .option-text {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--white);
+        }
+
+        .option-subtitle {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .price-badge {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--orange);
+            flex-shrink: 0;
+        }
+
+        .stats-iframe {
+            width: 100%;
+            height: 300px;
+            border: none;
+            border-radius: 12px;
+            background: var(--dark-bg);
+        }
+
         .total-section {
             position: fixed;
             bottom: 0;
@@ -208,25 +264,10 @@
             background-clip: text;
         }
 
-        .discount-label {
-            font-size: 13px;
-            color: #10b981;
-            font-weight: 600;
-        }
-
-        .error-message {
-            background: rgba(239, 68, 68, 0.15);
-            border: 2px solid #ef4444;
-            color: #fca5a5;
-            padding: 16px;
-            border-radius: 12px;
-            font-size: 14px;
-            margin-bottom: 20px;
-            display: none;
-        }
-
-        .error-message.show {
-            display: block;
+        .total-breakdown {
+            font-size: 12px;
+            color: var(--gray);
+            margin-top: 8px;
         }
 
         @keyframes fadeInUp {
@@ -248,112 +289,195 @@
         .section:nth-child(1) { animation-delay: 0.1s; }
         .section:nth-child(2) { animation-delay: 0.2s; }
         .section:nth-child(3) { animation-delay: 0.3s; }
+        .section:nth-child(4) { animation-delay: 0.4s; }
+        .section:nth-child(5) { animation-delay: 0.5s; }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>💰 Калькулятор бюджета</h1>
-        <p class="subtitle">Выберите параметры размещения</p>
+        <p class="subtitle">Премиум-калькулятор рекламной кампании</p>
 
-        <div class="error-message" id="errorMessage">
-            ⚠️ Выберите хотя бы одну платформу
-        </div>
-
-        <!-- ФОРМАТ -->
+        <!-- ПАКЕТЫ РАЗМЕЩЕНИЯ -->
         <div class="section">
-            <div class="section-title">📺 Формат размещения</div>
-            <div class="option selected" data-type="format" data-value="ad">
-                <div class="option-icon">📢</div>
-                <div class="option-content">
-                    <div class="option-text">Готовый ролик</div>
-                    <div class="option-subtitle">У вас есть видео</div>
-                </div>
+            <div class="section-title">
+                📺 Пакет размещения
+                <span class="badge">Шаг 1</span>
             </div>
-            <div class="option" data-type="format" data-value="production">
-                <div class="option-icon">🎬</div>
-                <div class="option-content">
-                    <div class="option-text">Производство</div>
-                    <div class="option-subtitle">Нужно снять ролик/фильм</div>
-                </div>
-            </div>
-            <div class="option" data-type="format" data-value="blogger">
-                <div class="option-icon">👤</div>
-                <div class="option-content">
-                    <div class="option-text">Блогерская интеграция</div>
-                    <div class="option-subtitle">Нативное размещение</div>
-                </div>
-            </div>
-            <div class="option" data-type="format" data-value="combo">
-                <div class="option-icon">🔥</div>
-                <div class="option-content">
-                    <div class="option-text">Всё и сразу (КОМБО)</div>
-                    <div class="option-subtitle">Производство + размещение + блогеры</div>
-                </div>
-            </div>
-        </div>
 
-        <!-- ПЛАТФОРМЫ -->
-        <div class="section">
-            <div class="section-title">📱 Платформы</div>
-            <div class="checkbox-group">
-                <div class="checkbox-option selected" data-type="platform" data-value="air">
-                    <div class="checkbox"></div>
-                    <div class="option-content">
-                        <div class="option-text">📺 Эфир ТВ</div>
-                        <div class="option-subtitle">950 000 зрителей/неделя</div>
+            <div class="package-card selected" data-type="package" data-value="start" data-price="450000">
+                <div class="package-header">
+                    <div>
+                        <div class="package-name">СТАРТ</div>
+                        <div class="package-desc">Быстрый запуск и тест гипотез</div>
                     </div>
+                    <div class="package-price">450 т₽</div>
                 </div>
-                <div class="checkbox-option" data-type="platform" data-value="youtube">
-                    <div class="checkbox"></div>
-                    <div class="option-content">
-                        <div class="option-text">▶️ YouTube</div>
-                        <div class="option-subtitle">630 000 подписчиков</div>
-                    </div>
+                <div class="package-features">
+                    <div class="feature">2 недели, до 20 выходов × 15 сек</div>
+                    <div class="feature">Эфир 24/7 + соцсети</div>
+                    <div class="feature">Базовая оптимизация ротации</div>
                 </div>
-                <div class="checkbox-option" data-type="platform" data-value="vk">
-                    <div class="checkbox"></div>
-                    <div class="option-content">
-                        <div class="option-text">💬 VK</div>
-                        <div class="option-subtitle">280 000 подписчиков</div>
+            </div>
+
+            <div class="package-card" data-type="package" data-value="growth" data-price="600000">
+                <div class="package-header">
+                    <div>
+                        <div class="package-name">РОСТ</div>
+                        <div class="package-desc">Баланс охвата и частоты</div>
                     </div>
+                    <div class="package-price">600 т₽</div>
                 </div>
-                <div class="checkbox-option" data-type="platform" data-value="site">
-                    <div class="checkbox"></div>
-                    <div class="option-content">
-                        <div class="option-text">🌐 Сайт + соцсети</div>
-                        <div class="option-subtitle">Статья + посты (90К/месяц)</div>
+                <div class="package-features">
+                    <div class="feature">3 недели, до 36 выходов × 15–20 сек</div>
+                    <div class="feature">Эфир + IPTV/отели + соцсети</div>
+                    <div class="feature">Отчёт по эффективности</div>
+                </div>
+            </div>
+
+            <div class="package-card" data-type="package" data-value="breakthrough" data-price="900000">
+                <div class="package-header">
+                    <div>
+                        <div class="package-name">ПРОРЫВ</div>
+                        <div class="package-desc">Мощная кампания с кросс-промо</div>
                     </div>
+                    <div class="package-price">900 т₽</div>
+                </div>
+                <div class="package-features">
+                    <div class="feature">4 недели, до 64 выходов × 20 сек</div>
+                    <div class="feature">Эфир + IPTV/отели + соцсети + кросс-промо</div>
+                    <div class="feature">Креативные интеграции</div>
+                </div>
+            </div>
+
+            <div class="package-card" data-type="package" data-value="vip" data-price="1500000">
+                <div class="package-header">
+                    <div>
+                        <div class="package-name">VIP</div>
+                        <div class="package-desc">Максимум внимания + спецпроект</div>
+                    </div>
+                    <div class="package-price">1 500 т₽</div>
+                </div>
+                <div class="package-features">
+                    <div class="feature">6 недель, до 96 выходов × 30 сек</div>
+                    <div class="feature">Эфир + все носители + спецпроект</div>
+                    <div class="feature">Персональный менеджер</div>
                 </div>
             </div>
         </div>
 
-        <!-- ПАКЕТ -->
+        <!-- ПРОИЗВОДСТВО РОЛИКА -->
         <div class="section">
-            <div class="section-title">📦 Пакет размещения</div>
-            <div class="option selected" data-type="package" data-value="S">
-                <div class="option-icon">📦</div>
-                <div class="option-content">
-                    <div class="option-text">Пакет S — Старт</div>
-                    <div class="option-subtitle">1 месяц, базовый охват</div>
-                </div>
-                <div class="price-badge" id="priceS">150 000 ₽</div>
+            <div class="section-title">
+                🎬 Производство ролика (до 60 сек)
+                <span class="badge">Опционально</span>
             </div>
-            <div class="option" data-type="package" data-value="M">
-                <div class="option-icon">📦📦</div>
+
+            <div class="checkbox-option selected" data-type="production" data-value="base" data-price="50000">
+                <div class="checkbox"></div>
                 <div class="option-content">
-                    <div class="option-text">Пакет M — Профи</div>
-                    <div class="option-subtitle">3 месяца, повышенный охват</div>
+                    <div class="option-text">Базовый ролик</div>
+                    <div class="option-subtitle">Без съёмки, с озвучкой</div>
                 </div>
-                <div class="price-badge" id="priceM">400 000 ₽</div>
+                <div class="price-badge">50 т₽</div>
             </div>
-            <div class="option" data-type="package" data-value="L">
-                <div class="option-icon">📦📦📦</div>
+
+            <div class="checkbox-option" data-type="production" data-value="shoot-msk" data-price="150000">
+                <div class="checkbox"></div>
                 <div class="option-content">
-                    <div class="option-text">Пакет L — Максимум</div>
-                    <div class="option-subtitle">6 месяцев, максимальный охват</div>
+                    <div class="option-text">+ Съёмка (Москва)</div>
+                    <div class="option-subtitle">Профессиональная съёмка</div>
                 </div>
-                <div class="price-badge" id="priceL">700 000 ₽</div>
+                <div class="price-badge">+150 т₽</div>
             </div>
+
+            <div class="checkbox-option" data-type="production" data-value="shoot-region" data-price="200000">
+                <div class="checkbox"></div>
+                <div class="option-content">
+                    <div class="option-text">+ Съёмка (регионы)</div>
+                    <div class="option-subtitle">Включая дорогу и проживание</div>
+                </div>
+                <div class="price-badge">+200 т₽</div>
+            </div>
+
+            <div class="checkbox-option" data-type="production" data-value="voice" data-price="20000">
+                <div class="checkbox"></div>
+                <div class="option-content">
+                    <div class="option-text">+ Озвучка</div>
+                    <div class="option-subtitle">Профессиональный диктор</div>
+                </div>
+                <div class="price-badge">+20 т₽</div>
+            </div>
+
+            <div class="checkbox-option" data-type="production" data-value="graphics" data-price="20000">
+                <div class="checkbox"></div>
+                <div class="option-content">
+                    <div class="option-text">+ Графика (10 сек)</div>
+                    <div class="option-subtitle">Анимация и спецэффекты</div>
+                </div>
+                <div class="price-badge">+20 т₽</div>
+            </div>
+
+            <div class="checkbox-option" data-type="production" data-value="creative" data-price="50000">
+                <div class="checkbox"></div>
+                <div class="option-content">
+                    <div class="option-text">+ Креативная разработка</div>
+                    <div class="option-subtitle">Сценарий и режиссура</div>
+                </div>
+                <div class="price-badge">+50 т₽</div>
+            </div>
+
+            <div class="checkbox-option" data-type="production" data-value="actors" data-price="100000">
+                <div class="checkbox"></div>
+                <div class="option-content">
+                    <div class="option-text">+ Участие актёров</div>
+                    <div class="option-subtitle">Профессиональные актёры</div>
+                </div>
+                <div class="price-badge">+100 т₽</div>
+            </div>
+        </div>
+
+        <!-- БЛОГЕРСКИЕ ИНТЕГРАЦИИ -->
+        <div class="section">
+            <div class="section-title">
+                👤 Блогерская интеграция
+                <span class="badge">Опционально</span>
+            </div>
+
+            <div class="checkbox-option" data-type="blogger" data-value="top" data-price="150000">
+                <div class="checkbox"></div>
+                <div class="option-content">
+                    <div class="option-text">ТОП блогер</div>
+                    <div class="option-subtitle">От 50 000 подписчиков, программа 15-30 мин</div>
+                </div>
+                <div class="price-badge">150 т₽</div>
+            </div>
+
+            <div class="checkbox-option" data-type="blogger" data-value="mega" data-price="300000">
+                <div class="checkbox"></div>
+                <div class="option-content">
+                    <div class="option-text">МЕГА блогер</div>
+                    <div class="option-subtitle">От 300 000 подписчиков, программа 15-30 мин</div>
+                </div>
+                <div class="price-badge">300 т₽</div>
+            </div>
+
+            <div class="checkbox-option" data-type="blogger" data-value="super" data-price="600000">
+                <div class="checkbox"></div>
+                <div class="option-content">
+                    <div class="option-text">СУПЕР блогер</div>
+                    <div class="option-subtitle">Супертоп, программа 15-30 мин</div>
+                </div>
+                <div class="price-badge">600 т₽</div>
+            </div>
+        </div>
+
+        <!-- ОНЛАЙН СТАТИСТИКА -->
+        <div class="section">
+            <div class="section-title">
+                📊 Онлайн-статистика канала
+            </div>
+            <iframe class="stats-iframe" src="https://1tourtv.ru/compas1/tourcompas/"></iframe>
         </div>
     </div>
 
@@ -362,10 +486,10 @@
         <div class="total-content">
             <div class="total-row">
                 <span class="total-label">Итого:</span>
-                <span class="total-amount" id="totalAmount">150 000 ₽</span>
+                <span class="total-amount" id="totalAmount">500 000 ₽</span>
             </div>
-            <div class="total-row" id="discountRow" style="display: none;">
-                <span class="discount-label">💚 Скидка 10% за комбо!</span>
+            <div class="total-breakdown" id="breakdown">
+                Пакет СТАРТ (450 т₽) + Базовый ролик (50 т₽)
             </div>
         </div>
     </div>
@@ -374,118 +498,105 @@
         const tg = window.Telegram.WebApp;
         tg.ready();
         tg.expand();
-        tg.MainButton.setText('Отправить расчёт');
+        tg.MainButton.setText('Отправить расчёт менеджеру');
         tg.MainButton.show();
 
         let selected = {
-            format: 'ad',
-            platforms: ['air'],
-            package: 'S'
+            package: { name: 'СТАРТ', price: 450000 },
+            production: [{ name: 'Базовый ролик', price: 50000 }],
+            blogger: null
         };
 
-        const prices = {
-            ad: { S: 150000, M: 400000, L: 700000 },
-            production: { S: 250000, M: 650000, L: 1200000 },
-            blogger: { S: 200000, M: 500000, L: 900000 },
-            combo: { S: 450000, M: 1200000, L: 2200000 }
-        };
+        function calculateTotal() {
+            let total = selected.package.price;
+            let breakdown = [`Пакет ${selected.package.name} (${(selected.package.price / 1000).toFixed(0)} т₽)`];
 
-        const platformMultipliers = {
-            air: 1.0,
-            youtube: 0.3,
-            vk: 0.25,
-            site: 0.15
-        };
+            if (selected.production.length > 0) {
+                const prodTotal = selected.production.reduce((sum, p) => sum + p.price, 0);
+                total += prodTotal;
+                breakdown.push(`Производство (${(prodTotal / 1000).toFixed(0)} т₽)`);
+            }
 
-        function calculatePrice() {
-            const basePrice = prices[selected.format][selected.package];
-            
-            let platformMultiplier = 0;
-            selected.platforms.forEach(p => {
-                platformMultiplier += platformMultipliers[p];
-            });
-
-            let total = Math.round(basePrice * platformMultiplier);
-            
-            // Скидка 10% за комбо
-            if (selected.format === 'combo') {
-                total = Math.round(total * 0.9);
-                document.getElementById('discountRow').style.display = 'flex';
-            } else {
-                document.getElementById('discountRow').style.display = 'none';
+            if (selected.blogger) {
+                total += selected.blogger.price;
+                breakdown.push(`Блогер ${selected.blogger.name} (${(selected.blogger.price / 1000).toFixed(0)} т₽)`);
             }
 
             document.getElementById('totalAmount').textContent = total.toLocaleString('ru-RU') + ' ₽';
+            document.getElementById('breakdown').textContent = breakdown.join(' + ');
 
-            // Обновляем цены пакетов
-            ['S', 'M', 'L'].forEach(pkg => {
-                const price = Math.round(prices[selected.format][pkg] * platformMultiplier);
-                const discount = selected.format === 'combo' ? Math.round(price * 0.9) : price;
-                document.getElementById('price' + pkg).textContent = discount.toLocaleString('ru-RU') + ' ₽';
-            });
+            return total;
         }
 
-        // Форматы (radio)
-        document.querySelectorAll('[data-type="format"]').forEach(option => {
-            option.addEventListener('click', () => {
-                document.querySelectorAll('[data-type="format"]').forEach(o => o.classList.remove('selected'));
-                option.classList.add('selected');
-                selected.format = option.dataset.value;
+        // Пакеты (radio)
+        document.querySelectorAll('[data-type="package"]').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('[data-type="package"]').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                
+                selected.package = {
+                    name: card.querySelector('.package-name').textContent,
+                    price: parseInt(card.dataset.price)
+                };
+                
                 tg.HapticFeedback.impactOccurred('light');
-                calculatePrice();
+                calculateTotal();
             });
         });
 
-        // Платформы (checkbox)
-        document.querySelectorAll('[data-type="platform"]').forEach(option => {
+        // Производство (checkbox multiple)
+        document.querySelectorAll('[data-type="production"]').forEach(option => {
             option.addEventListener('click', () => {
                 option.classList.toggle('selected');
-                const value = option.dataset.value;
+                
+                const name = option.querySelector('.option-text').textContent;
+                const price = parseInt(option.dataset.price);
                 
                 if (option.classList.contains('selected')) {
-                    selected.platforms.push(value);
+                    selected.production.push({ name, price });
                 } else {
-                    selected.platforms = selected.platforms.filter(p => p !== value);
+                    selected.production = selected.production.filter(p => p.name !== name);
                 }
                 
                 tg.HapticFeedback.impactOccurred('light');
-                
-                if (selected.platforms.length === 0) {
-                    document.getElementById('errorMessage').classList.add('show');
-                    tg.MainButton.hide();
-                } else {
-                    document.getElementById('errorMessage').classList.remove('show');
-                    tg.MainButton.show();
-                    calculatePrice();
-                }
+                calculateTotal();
             });
         });
 
-        // Пакеты (radio)
-        document.querySelectorAll('[data-type="package"]').forEach(option => {
+        // Блогеры (radio)
+        document.querySelectorAll('[data-type="blogger"]').forEach(option => {
             option.addEventListener('click', () => {
-                document.querySelectorAll('[data-type="package"]').forEach(o => o.classList.remove('selected'));
-                option.classList.add('selected');
-                selected.package = option.dataset.value;
+                const wasSelected = option.classList.contains('selected');
+                
+                document.querySelectorAll('[data-type="blogger"]').forEach(o => o.classList.remove('selected'));
+                
+                if (!wasSelected) {
+                    option.classList.add('selected');
+                    selected.blogger = {
+                        name: option.querySelector('.option-text').textContent,
+                        price: parseInt(option.dataset.price)
+                    };
+                } else {
+                    selected.blogger = null;
+                }
+                
                 tg.HapticFeedback.impactOccurred('light');
-                calculatePrice();
+                calculateTotal();
             });
         });
 
         // Отправка данных
         tg.MainButton.onClick(() => {
-            if (selected.platforms.length === 0) {
-                tg.showAlert('Выберите хотя бы одну платформу!');
-                return;
-            }
-
             tg.HapticFeedback.notificationOccurred('success');
             
             const data = {
-                format: selected.format,
-                platforms: selected.platforms,
-                package: selected.package,
-                total: document.getElementById('totalAmount').textContent,
+                package: selected.package.name,
+                packagePrice: selected.package.price,
+                production: selected.production.map(p => p.name),
+                productionPrice: selected.production.reduce((sum, p) => sum + p.price, 0),
+                blogger: selected.blogger?.name || 'Нет',
+                bloggerPrice: selected.blogger?.price || 0,
+                total: calculateTotal(),
                 userId: tg.initDataUnsafe?.user?.id || null
             };
 
@@ -494,7 +605,7 @@
         });
 
         // Инициализация
-        calculatePrice();
+        calculateTotal();
     </script>
 </body>
 </html>
