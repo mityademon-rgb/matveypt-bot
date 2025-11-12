@@ -414,17 +414,12 @@ bot.on('message', async (msg) => {
       { 
         text: '🧮 Открыть калькулятор',
         web_app: { 
-          url: `${process.env.WEB_APP_URL}/calculator.html`
+          url: 'https://matveypt-bot-production.up.railway.app/calculator.html'  // ← ДОБАВИЛ https://
         }
       }
     ]]
   };
-  
-  await bot.sendMessage(chatId, '💰 Калькулятор бюджета — открывайте! 👇', {
-    reply_markup: keyboard
-  });
-  return;
-}
+
 
   
   if (text === '📞 Связаться с менеджером') {
