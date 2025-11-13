@@ -196,8 +196,7 @@
       .stat-card{flex-basis:100%}
     }
 
-    /* === Кнопка перехода к калькулятору (внутри контента) === */
-
+    /* === Кнопка перехода к калькулятору === */
     .cta-calc{
       margin:6px 0 10px;
       display:flex;
@@ -218,8 +217,7 @@
       box-shadow:0 8px 20px rgba(243,112,33,.35);
     }
 
-    /* === Калькулятор бюджета — единый белый стиль === */
-
+    /* === Калькулятор бюджета === */
     .calc-wrap{
       margin-top:4px;
       background:var(--card-bg);
@@ -280,7 +278,6 @@
       flex-shrink:0;
     }
 
-    /* Превью-картинки для секций */
     .section-thumb{
       width:100%;
       border-radius:14px;
@@ -434,7 +431,6 @@
       white-space:nowrap;
     }
 
-    /* Итог */
     .total-box{
       margin-top:12px;
       background:#fff;
@@ -479,7 +475,6 @@
       color:var(--muted);
     }
 
-    /* === Нижняя панель с кнопками === */
     .footer-actions{
       position:fixed;
       left:0;
@@ -497,8 +492,7 @@
       display:flex;
       gap:8px;
     }
-    .btn-ghost,
-    .btn-primary{
+    .btn-ghost{
       flex:1;
       border-radius:999px;
       padding:11px 14px;
@@ -511,8 +505,6 @@
       justify-content:center;
       gap:6px;
       white-space:nowrap;
-    }
-    .btn-ghost{
       background:#ffffff;
       color:#6e6472;
       border:1px solid #d5d1e4;
@@ -528,7 +520,6 @@
 <body>
   <div class="page">
 
-    <!-- HERO ШАПКА -->
     <section class="hero">
       <div class="hero-top">
         <div class="hero-logo"><span>TV</span></div>
@@ -548,9 +539,7 @@
       </div>
     </section>
 
-    <!-- Две маленькие карточки статистики -->
     <section class="top-stats">
-      <!-- Сейчас в эфире -->
       <div class="stat-card">
         <div class="stat-card__label">СЕЙЧАС СМОТРЯТ</div>
         <div class="stat-card__value" id="nowWatch">0</div>
@@ -562,7 +551,6 @@
         </div>
       </div>
 
-      <!-- Аудитория в месяц -->
       <div class="stat-card">
         <div class="stat-card__label">АУДИТОРИЯ В МЕСЯЦ</div>
         <div class="stat-card__value" id="bigStatNum">0</div>
@@ -572,14 +560,12 @@
       </div>
     </section>
 
-    <!-- Кнопка к калькулятору (по желанию можно оставить) -->
     <div class="cta-calc">
       <button type="button" id="toCalcBtn">
         💰 Перейти к расчёту кампании
       </button>
     </div>
 
-    <!-- КАЛЬКУЛЯТОР -->
     <section class="calc-wrap" id="calculator">
       <div class="calc-header">
         <div class="calc-title">Соберите кампанию под ваши задачи</div>
@@ -588,7 +574,6 @@
         </div>
       </div>
 
-      <!-- 1. Производство ролика -->
       <div class="calc-section">
         <div class="calc-section-title">
           <span>Ролик и производство</span>
@@ -663,7 +648,6 @@
         </div>
       </div>
 
-      <!-- 2. Блогеры -->
       <div class="calc-section">
         <div class="calc-section-title">
           <span>Блогерская поддержка</span>
@@ -678,7 +662,7 @@
           <div class="checkbox"></div>
           <div class="option-content">
             <div class="option-text">ТОП-блогер</div>
-            <div class="option-subtitle">От 50 000 подписчиков, формат “реальный опыт”</div>
+            <div class="option-subtitle">От 50 000 подписчиков, формат "реальный опыт"</div>
           </div>
           <div class="price-badge">150 000 ₽</div>
         </div>
@@ -702,7 +686,6 @@
         </div>
       </div>
 
-      <!-- 3. Пакеты минут / размещение -->
       <div class="calc-section" id="section-packages">
         <div class="calc-section-title">
           <span>Пакет минут и размещение</span>
@@ -745,7 +728,7 @@
           <div class="package-header">
             <div>
               <div class="package-name">OPTIMA</div>
-              <div class="package-desc">Когда нужно “раскачать” бренд и собрать максимум внимания.</div>
+              <div class="package-desc">Когда нужно "раскачать" бренд и собрать максимум внимания.</div>
               <div class="package-meta">30 дней • эфир + сайт + соцсети + партнёры • ~30 минут</div>
             </div>
             <div class="package-price">900 000 ₽</div>
@@ -761,7 +744,7 @@
           <div class="package-header">
             <div>
               <div class="package-name">PRO</div>
-              <div class="package-desc">История “мы здесь надолго”: спецпроект под вас.</div>
+              <div class="package-desc">История "мы здесь надолго": спецпроект под вас.</div>
               <div class="package-meta">Индивидуальные сроки • все носители • ~45 минут</div>
             </div>
             <div class="package-price">1 500 000 ₽</div>
@@ -774,7 +757,6 @@
         </div>
       </div>
 
-      <!-- Итог -->
       <div class="total-box">
         <div class="total-row">
           <div class="total-label">Итого ориентировочно:</div>
@@ -790,7 +772,6 @@
     </section>
   </div>
 
-  <!-- Нижние кнопки -->
   <div class="footer-actions">
     <div class="footer-inner">
       <button class="btn-ghost" type="button" id="backToChatBtn">
@@ -800,202 +781,203 @@
   </div>
 
   <script>
-    const tg = window.Telegram ? window.Telegram.WebApp : null;
+   const tg = window.Telegram ? window.Telegram.WebApp : null;
 
-    if (tg) {
-      tg.ready();
-      tg.expand();
-      tg.MainButton.setText('Отправить продюсеру — он свяжется с вами');
-      tg.MainButton.hide(); // появится, когда что-то выбрано
+if (tg) {
+  tg.ready();
+  tg.expand();
+  tg.MainButton.setText('Отправить продюсеру — он свяжется с вами');
+  tg.MainButton.hide();
+}
+
+const fmt = n => (n).toLocaleString('ru-RU');
+
+// Анимация месячной аудитории
+(function(){
+  const el = document.getElementById('bigStatNum');
+  let val = 0;
+  const target = 1200000;
+  const step = Math.round(target / 80);
+  const timer = setInterval(()=>{
+    val += step;
+    if (val >= target){
+      val = target;
+      clearInterval(timer);
+    }
+    el.textContent = fmt(val);
+  }, 40);
+})();
+
+// Онлайн-цифры
+(function(){
+  const elNow = document.getElementById('nowWatch');
+  const elTur = document.getElementById('turWatch');
+  const elRus = document.getElementById('rusWatch');
+  const rnd = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+
+  let now = 186540, tur = 72300, rus = 45200;
+
+  function paint(){
+    elNow.textContent = fmt(now);
+    elTur.textContent = fmt(tur);
+    elRus.textContent = fmt(rus);
+  }
+
+  paint();
+
+  setInterval(()=>{
+    const step = Math.max(200, Math.round(now*(Math.random()*0.012+0.004)));
+    now = Math.max(60000, Math.min(350000, now + (Math.random()<.5 ? -step : step)));
+    const tStep = rnd(300, 2400);
+    const rStep = rnd(300, 1800);
+    tur = Math.max(20000, Math.min(120000, tur + (Math.random()<.5 ? -tStep : tStep)));
+    rus = Math.max(10000, Math.min(100000, rus + (Math.random()<.5 ? -rStep : rStep)));
+  }, 7000);
+
+  setInterval(paint, 1500);
+})();
+
+// Скролл к калькулятору
+const toCalcBtn = document.getElementById('toCalcBtn');
+const calcSection = document.getElementById('calculator');
+
+function scrollToCalc(){
+  calcSection.scrollIntoView({behavior:'smooth',block:'start'});
+  if (tg) {
+    try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+  }
+}
+
+toCalcBtn.addEventListener('click', scrollToCalc);
+
+// Кнопка "Назад"
+const backToChatBtn = document.getElementById('backToChatBtn');
+backToChatBtn.addEventListener('click', ()=>{
+  if (tg) {
+    try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+    tg.close();
+  } else {
+    window.history.back();
+  }
+});
+
+// Калькулятор
+const totalEl = document.getElementById('totalAmount');
+const breakdownEl = document.getElementById('breakdown');
+
+let selected = {
+  package: null,
+  production: [],
+  blogger: null
+};
+
+function calculateTotal(){
+  let total = 0;
+  const parts = [];
+
+  if (selected.production.length){
+    const prodTotal = selected.production.reduce((sum,p)=>sum+p.price,0);
+    total += prodTotal;
+    parts.push(`Производство (${(prodTotal/1000).toFixed(0)} т₽: ${selected.production.map(p=>p.name).join(', ')})`);
+  }
+
+  if (selected.blogger){
+    total += selected.blogger.price;
+    parts.push(`Блогер (${(selected.blogger.price/1000).toFixed(0)} т₽: ${selected.blogger.name})`);
+  }
+
+  if (selected.package){
+    total += selected.package.price;
+    parts.push(`Пакет ${selected.package.name} (${(selected.package.price/1000).toFixed(0)} т₽)`);
+  }
+
+  if (!selected.package && !selected.production.length && !selected.blogger){
+    totalEl.textContent = '0 ₽';
+    breakdownEl.classList.add('empty');
+    breakdownEl.textContent = 'Пока ничего не выбрано — отметьте нужные опции, и здесь появится ориентировочный бюджет.';
+    if (tg) tg.MainButton.hide();
+    return 0;
+  }
+
+  totalEl.textContent = total.toLocaleString('ru-RU') + ' ₽';
+  breakdownEl.classList.remove('empty');
+  breakdownEl.textContent = parts.join(' + ');
+
+  if (tg){
+    tg.MainButton.show();
+  }
+
+  return total;
+}
+
+// Производство
+document.querySelectorAll('[data-type="production"]').forEach(option=>{
+  option.addEventListener('click', ()=>{
+    option.classList.toggle('selected');
+
+    const name = option.querySelector('.option-text').textContent.trim();
+    const price = parseInt(option.dataset.price,10);
+
+    if (option.classList.contains('selected')){
+      selected.production.push({name,price});
+    } else {
+      selected.production = selected.production.filter(p=>p.name!==name);
     }
 
-    const fmt = n => (n).toLocaleString('ru-RU');
+    if (tg){
+      try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+    }
+    calculateTotal();
+  });
+});
 
-    // Анимация месячной аудитории
-    (function(){
-      const el = document.getElementById('bigStatNum');
-      let val = 0;
-      const target = 1200000;
-      const step = Math.round(target / 80);
-      const timer = setInterval(()=>{
-        val += step;
-        if (val >= target){
-          val = target;
-          clearInterval(timer);
-        }
-        el.textContent = fmt(val);
-      }, 40);
-    })();
+// Блогеры
+document.querySelectorAll('[data-type="blogger"]').forEach(option=>{
+  option.addEventListener('click', ()=>{
+    const already = option.classList.contains('selected');
+    document.querySelectorAll('[data-type="blogger"]').forEach(o=>o.classList.remove('selected'));
 
-    // Онлайн-цифры "сейчас смотрят" в маленькой карточке
-    (function(){
-      const elNow = document.getElementById('nowWatch');
-      const elTur = document.getElementById('turWatch');
-      const elRus = document.getElementById('rusWatch');
-      const rnd = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
-
-      let now = 186540, tur = 72300, rus = 45200;
-
-      function paint(){
-        elNow.textContent = fmt(now);
-        elTur.textContent = fmt(tur);
-        elRus.textContent = fmt(rus);
-      }
-
-      paint();
-
-      setInterval(()=>{
-        const step = Math.max(200, Math.round(now*(Math.random()*0.012+0.004)));
-        now = Math.max(60000, Math.min(350000, now + (Math.random()<.5 ? -step : step)));
-        const tStep = rnd(300, 2400);
-        const rStep = rnd(300, 1800);
-        tur = Math.max(20000, Math.min(120000, tur + (Math.random()<.5 ? -tStep : tStep)));
-        rus = Math.max(10000, Math.min(100000, rus + (Math.random()<.5 ? -rStep : rStep)));
-      }, 7000);
-
-      setInterval(paint, 1500);
-    })();
-
-    // Скролл к калькулятору (кнопка в контенте)
-    const toCalcBtn = document.getElementById('toCalcBtn');
-    const calcSection = document.getElementById('calculator');
-
-    function scrollToCalc(){
-      calcSection.scrollIntoView({behavior:'smooth',block:'start'});
-      if (tg) {
-        try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
-      }
+    if (already){
+      selected.blogger = null;
+    } else {
+      option.classList.add('selected');
+      const name = option.querySelector('.option-text').textContent.trim();
+      const price = parseInt(option.dataset.price,10);
+      selected.blogger = {name,price};
     }
 
-    toCalcBtn.addEventListener('click', scrollToCalc);
+    if (tg){
+      try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+    }
+    calculateTotal();
+  });
+});
 
-    // Кнопка "Назад в Telegram"
-    const backToChatBtn = document.getElementById('backToChatBtn');
-    backToChatBtn.addEventListener('click', ()=>{
-      if (tg) {
-        try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
-        tg.close();
-      } else {
-        window.history.back();
-      }
-    });
+// Пакеты
+document.querySelectorAll('[data-type="package"]').forEach(card=>{
+  card.addEventListener('click', ()=>{
+    document.querySelectorAll('[data-type="package"]').forEach(c=>c.classList.remove('selected'));
+    card.classList.add('selected');
 
-    // Калькулятор
-    const totalEl = document.getElementById('totalAmount');
-    const breakdownEl = document.getElementById('breakdown');
-
-    let selected = {
-      package: null,
-      production: [],
-      blogger: null
+    selected.package = {
+      name: card.dataset.value,
+      price: parseInt(card.dataset.price,10)
     };
 
-    function calculateTotal(){
-      let total = 0;
-      const parts = [];
-
-      // Производство
-      if (selected.production.length){
-        const prodTotal = selected.production.reduce((sum,p)=>sum+p.price,0);
-        total += prodTotal;
-        parts.push(`Производство (${(prodTotal/1000).toFixed(0)} т₽: ${selected.production.map(p=>p.name).join(', ')})`);
-      }
-
-      // Блогеры
-      if (selected.blogger){
-        total += selected.blogger.price;
-        parts.push(`Блогер (${(selected.blogger.price/1000).toFixed(0)} т₽: ${selected.blogger.name})`);
-      }
-
-      // Пакет
-      if (selected.package){
-        total += selected.package.price;
-        parts.push(`Пакет ${selected.package.name} (${(selected.package.price/1000).toFixed(0)} т₽)`);
-      }
-
-      if (!selected.package && !selected.production.length && !selected.blogger){
-        totalEl.textContent = '0 ₽';
-        breakdownEl.classList.add('empty');
-        breakdownEl.textContent = 'Пока ничего не выбрано — отметьте нужные опции, и здесь появится ориентировочный бюджет.';
-        if (tg) tg.MainButton.hide();
-        return 0;
-      }
-
-      totalEl.textContent = total.toLocaleString('ru-RU') + ' ₽';
-      breakdownEl.classList.remove('empty');
-      breakdownEl.textContent = parts.join(' + ');
-
-      if (tg){
-        tg.MainButton.show();
-      }
-
-      return total;
+    if (tg){
+      try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
     }
+    calculateTotal();
+  });
+});
 
-    // Производство (multi-checkbox)
-    document.querySelectorAll('[data-type="production"]').forEach(option=>{
-      option.addEventListener('click', ()=>{
-        option.classList.toggle('selected');
-
-        const name = option.querySelector('.option-text').textContent.trim();
-        const price = parseInt(option.dataset.price,10);
-
-        if (option.classList.contains('selected')){
-          selected.production.push({name,price});
-        } else {
-          selected.production = selected.production.filter(p=>p.name!==name);
-        }
-
-        if (tg){
-          try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
-        }
-        calculateTotal();
-      });
-    });
-
-    // Блогеры (radio — с возможностью снять выбор)
-    document.querySelectorAll('[data-type="blogger"]').forEach(option=>{
-      option.addEventListener('click', ()=>{
-        const already = option.classList.contains('selected');
-        document.querySelectorAll('[data-type="blogger"]').forEach(o=>o.classList.remove('selected'));
-
-        if (already){
-          selected.blogger = null;
-        } else {
-          option.classList.add('selected');
-          const name = option.querySelector('.option-text').textContent.trim();
-          const price = parseInt(option.dataset.price,10);
-          selected.blogger = {name,price};
-        }
-
-        if (tg){
-          try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
-        }
-        calculateTotal();
-      });
-    });
-
-    // Пакеты (radio)
-    document.querySelectorAll('[data-type="package"]').forEach(card=>{
-      card.addEventListener('click', ()=>{
-        document.querySelectorAll('[data-type="package"]').forEach(c=>c.classList.remove('selected'));
-        card.classList.add('selected');
-
-        selected.package = {
-          name: card.dataset.value,
-          price: parseInt(card.dataset.price,10)
-        };
-
-        if (tg){
-          try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
-        }
-        calculateTotal();
-      });
-    });
-
-    // MainButton — отправка данных продюсеру
+// MainButton — ИСПРАВЛЕННАЯ ВЕРСИЯ
 if (tg){
   tg.MainButton.onClick(()=>{
+    // БЛОКИРУЕМ КНОПКУ
+    tg.MainButton.showProgress();
+    tg.MainButton.disable();
+    
     console.log('🔥 MainButton нажата!');
     
     try { 
@@ -1013,21 +995,28 @@ if (tg){
       total: calculateTotal()
     };
 
-    console.log('📦 Payload:', JSON.stringify(payload));
+    console.log('📦 Отправляю:', JSON.stringify(payload));
     
-    // ОТПРАВЛЯЕМ ДАННЫЕ
-    tg.sendData(JSON.stringify(payload));
-    
-    console.log('✅ Данные отправлены!');
-    
-    // ЗАКРЫВАЕМ С ЗАДЕРЖКОЙ (даём время отправить)
-    setTimeout(() => {
-      console.log('🚪 Закрываем WebApp');
-      tg.close();
-    }, 300);
+    try {
+      // ОТПРАВЛЯЕМ
+      tg.sendData(JSON.stringify(payload));
+      console.log('✅ sendData() вызван');
+      
+      // ЗАКРЫВАЕМ ЧЕРЕЗ 1 СЕКУНДУ
+      setTimeout(() => {
+        console.log('🚪 Закрываем WebApp');
+        tg.close();
+      }, 1000);
+      
+    } catch(e) {
+      console.error('❌ Ошибка:', e);
+      tg.MainButton.hideProgress();
+      tg.MainButton.enable();
+      tg.showAlert('Ошибка: ' + e.message);
+    }
   });
 }
-
   </script>
 </body>
 </html>
+
