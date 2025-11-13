@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f37021" />
+  
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <title>О канале — Первый туристический</title>
+
+  <style>
+    :root{
+      --brand:#f37021;
+      --brand2:#ff8a3c;
+      --bg:#f7f3fb;
+      --text:#2b2431;
+      --text-light:#756575;
+      --card-bg:#ffffff;
+      --border:#e3e0ee;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    
+    body{
+      font-family:'Montserrat',sans-serif;
+      background:linear-gradient(180deg,#f7f3fb,#f1f5ff);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      padding-bottom:80px;
+    }
+
+    .page{
+      max-width:680px;
+      margin:0 auto;
+      padding:16px;
+    }
+
+    .hero{
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      border-radius:24px;
+      padding:24px 20px;
+      color:#fff;
+      text-align:center;
+      margin-bottom:20px;
+      box-shadow:0 12px 32px rgba(243,112,33,.35);
+    }
+
+    .hero-logo{
+      width:64px;
+      height:64px;
+      background:#fff;
+      border-radius:50%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin:0 auto 12px;
+      font-weight:900;
+      font-size:28px;
+      color:var(--brand);
+    }
+
+    .hero-title{
+      font-size:24px;
+      font-weight:900;
+      margin-bottom:8px;
+      line-height:1.2;
+    }
+
+    .hero-subtitle{
+      font-size:14px;
+      opacity:.95;
+      font-weight:600;
+    }
+
+    .section{
+      background:var(--card-bg);
+      border-radius:20px;
+      padding:20px;
+      margin-bottom:16px;
+      border:1px solid var(--border);
+      box-shadow:0 8px 20px rgba(0,0,0,.04);
+    }
+
+    .section-title{
+      font-size:18px;
+      font-weight:800;
+      margin-bottom:12px;
+      color:var(--text);
+    }
+
+    .section-text{
+      font-size:14px;
+      line-height:1.65;
+      color:var(--text-light);
+      margin-bottom:12px;
+    }
+
+    .stat-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:12px;
+      margin-top:16px;
+    }
+
+    .stat-card{
+      background:linear-gradient(135deg,#fff5f0,#fff);
+      border-radius:14px;
+      padding:14px;
+      text-align:center;
+      border:1px solid #ffe8df;
+    }
+
+    .stat-number{
+      font-size:24px;
+      font-weight:900;
+      color:var(--brand);
+      margin-bottom:4px;
+    }
+
+    .stat-label{
+      font-size:11px;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      color:var(--text-light);
+      font-weight:700;
+    }
+
+    .features-list{
+      list-style:none;
+      padding:0;
+      margin:12px 0 0;
+    }
+
+    .features-list li{
+      padding:10px 0 10px 28px;
+      position:relative;
+      font-size:14px;
+      line-height:1.5;
+      color:var(--text-light);
+    }
+
+    .features-list li:before{
+      content:'✓';
+      position:absolute;
+      left:0;
+      top:10px;
+      color:#16a34a;
+      font-weight:800;
+      font-size:16px;
+    }
+
+    .badge{
+      display:inline-block;
+      background:#fff5f0;
+      color:var(--brand);
+      padding:6px 12px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.05em;
+      margin:4px 4px 4px 0;
+    }
+
+    .footer-btn{
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      padding:12px 16px 16px;
+      background:rgba(255,255,255,.96);
+      backdrop-filter:blur(12px);
+      border-top:1px solid var(--border);
+    }
+
+    .footer-btn button{
+      width:100%;
+      max-width:680px;
+      margin:0 auto;
+      display:block;
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      color:#fff;
+      border:none;
+      border-radius:999px;
+      padding:14px;
+      font-size:15px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(243,112,33,.35);
+    }
+
+    @media(max-width:640px){
+      .stat-grid{grid-template-columns:1fr}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    
+    <div class="hero">
+      <div class="hero-logo">TV</div>
+      <div class="hero-title">Первый туристический</div>
+      <div class="hero-subtitle">Федеральный телеканал о путешествиях</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📺 О канале</div>
+      <div class="section-text">
+        «Первый туристический телеканал» — это уникальный проект, который предлагает своим зрителям обзоры лучших мест для отдыха и путешествий по всему миру.
+      </div>
+      <div class="section-text">
+        Мы рассказываем о самых интересных и необычных местах, где можно хорошо провести время и насладиться красотами природы. Наши ведущие — опытные путешественники и тревел-блогеры.
+      </div>
+      <div class="section-text">
+        Телеканал работает круглосуточно и транслирует передачи о различных странах и городах, помогая зрителям выбрать идеальное место для отдыха.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🎯 Наша аудитория</div>
+      
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-number">1,2 млн</div>
+          <div class="stat-label">Зрителей в месяц</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number">25-55</div>
+          <div class="stat-label">Возраст ЦА</div>
+        </div>
+      </div>
+
+      <div class="section-text" style="margin-top:16px">
+        Наша целевая аудитория — активная платежеспособная категория людей в возрасте от 25 до 55 лет, которые заинтересованы в получении новых знаний и впечатлений.
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🌍 Где нас смотрят</div>
+      
+      <ul class="features-list">
+        <li><strong>IP-провайдеры и видеосервисы</strong> — Wink, МТС, Билайн и другие</li>
+        <li><strong>Кабельные сети</strong> — трансляция в крупных городах РФ</li>
+        <li><strong>Сетевые отели</strong> — Rixos, Barut, Kempinski (Россия и Турция)</li>
+        <li><strong>Онлайн</strong> — прямой эфир на сайте и в соцсетях</li>
+      </ul>
+
+      <div style="margin-top:12px">
+        <span class="badge">РФ</span>
+        <span class="badge">Турция</span>
+        <span class="badge">Скоро: ОАЭ и Египет</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🎬 Наш контент</div>
+      
+      <div class="section-text"><strong>40%</strong> — Токшоу и известные люди в студии</div>
+      <div class="section-text"><strong>45%</strong> — Блогеры и истории от первого лица</div>
+      <div class="section-text"><strong>15%</strong> — Полезный контент 24/7</div>
+
+      <ul class="features-list" style="margin-top:16px">
+        <li>Собственные программы с топовыми блогерами</li>
+        <li>Языковой барьер: разговорник для путешественников</li>
+        <li>Туристические лайфхаки от бывалых</li>
+        <li>Новости туризма без воды и рекламы</li>
+      </ul>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📱 Соцсети и трансляции</div>
+      <div class="section-text">
+        Мы есть во всех популярных соцсетях: Telegram, ВКонтакте, Одноклассники, RuTube, YouTube.
+      </div>
+      <div class="section-text">
+        Прямые трансляции в ВК и ОК. Лучшие программы на видеосервисах.
+      </div>
+      <div class="section-text" style="margin-top:12px">
+        <strong>📺 Смотреть прямой эфир:</strong><br>
+        <a href="http://1tourtv.ru" style="color:var(--brand);font-weight:700">1tourtv.ru</a>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📄 Регистрация</div>
+      <div class="section-text" style="font-size:12px">
+        Зарегистрировано Федеральной службой по надзору в сфере связи, информационных технологий и массовых коммуникаций.<br><br>
+        <strong>Регистрационный номер:</strong> серия Эл № ФС77-85763 от 14 августа 2023 г.
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-btn">
+    <button type="button" id="backBtn">⬅ Назад в Telegram</button>
+  </div>
+
+  <script>
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    document.getElementById('backBtn').addEventListener('click', ()=>{
+      if (tg) {
+        try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+        tg.close();
+      } else {
+        window.history.back();
+      }
+    });
+  </script>
+</body>
+</html>
