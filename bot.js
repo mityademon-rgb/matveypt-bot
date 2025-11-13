@@ -550,7 +550,7 @@ bot.on('message', async (msg) => {
     managerCalled: false
   };
 
-  try {
+    try {
     const lowerText = text?.toLowerCase() || '';
 
     if (!session.contactShared && session.stage === 'greeting') {
@@ -595,9 +595,6 @@ bot.on('message', async (msg) => {
       }
     }
 
-    await bot.sendChatAction(chatId, 'typing');
-
-    const
     await bot.sendChatAction(chatId, 'typing');
 
     const contextToSend = session.context.slice(-12);
