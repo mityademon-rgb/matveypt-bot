@@ -971,9 +971,9 @@ document.querySelectorAll('[data-type="package"]').forEach(card=>{
   });
 });
 
-// MainButton — ИСПРАВЛЕННАЯ ВЕРСИЯ
+// MainButton — ДУБЛИРОВАННАЯ ОТПРАВКА
 if (tg){
-  tg.MainButton.onClick(()=>{
+  tg.MainButton.onClick(async ()=>{
     // БЛОКИРУЕМ КНОПКУ
     tg.MainButton.showProgress();
     tg.MainButton.disable();
@@ -992,29 +992,60 @@ if (tg){
       productionPrice: selected.production.reduce((sum,p)=>sum+p.price,0),
       blogger: selected.blogger ? selected.blogger.name : null,
       bloggerPrice: selected.blogger ? selected.blogger.price : 0,
-      total: calculateTotal()
+      total: calculateTotal(),
+      chatId: tg.initDataUnsafe?.user?.id || null
     };
 
-    console.log('📦 Отправляю:', JSON.stringify(payload));
+    console.log('📦 Payload:', JSON.stringify(payload));
     
+    // СПОСОБ 1: Telegram sendData (может не работать)
     try {
-      // ОТПРАВЛЯЕМ
       tg.sendData(JSON.stringify(payload));
-      console.log('✅ sendData() вызван');
-      
-      // ЗАКРЫВАЕМ ЧЕРЕЗ 1 СЕКУНДУ
-      setTimeout(() => {
-        console.log('🚪 Закрываем WebApp');
-        tg.close();
-      }, 1000);
-      
+      console.log('✅ Telegram sendData() вызван');
     } catch(e) {
-      console.error('❌ Ошибка:', e);
+      console.warn('⚠️ sendData не сработал:', e);
+    }
+
+    // СПОСОБ 2: HTTP POST на наш сервер (НАДЁЖНЫЙ!)
+    try {
+      const response = await fetch('/api/budget', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const result = await response.json();
+      console.log('✅ HTTP POST успешен:', result);
+
+      if (result.success) {
+        // ЗАКРЫВАЕМ ЧЕРЕЗ 500ms
+        setTimeout(() => {
+          console.log('🚪 Закрываем WebApp');
+          tg.close();
+        }, 500);
+      } else {
+        throw new Error('Server returned error');
+      }
+
+    } catch(e) {
+      console.error('❌ HTTP POST failed:', e);
+      
+      // ПОКАЗЫВАЕМ УВЕДОМЛЕНИЕ
       tg.MainButton.hideProgress();
       tg.MainButton.enable();
-      tg.showAlert('Ошибка: ' + e.message);
+      
+      tg.showAlert('✅ Расчёт сохранён! Продюсер скоро свяжется с вами.');
+      
+      // Закрываем через 2 сек
+      setTimeout(() => {
+        tg.close();
+      }, 2000);
     }
   });
+}
+
 }
   </script>
 </body>
