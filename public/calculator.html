@@ -1,825 +1,1111 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>План кампании с Матвеем</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --brand: #f37021;
-            --brand-soft: #ffd3b0;
-            --brand-grad: linear-gradient(135deg, #f37021 0%, #ff8c61 100%);
-            --bg: #f5f5f7;
-            --card: #ffffff;
-            --ink: #171717;
-            --muted: #767a82;
-            --line: #e3e4ea;
-            --green: #10b981;
-            --radius: 18px;
-            --shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0e0e0f" />
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <!-- Для iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Первый туристический">
+  <link rel="apple-touch-icon" href="https://1tourtv.ru/wp-content/uploads/2025/08/icon192.png">
 
-        body {
-            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: radial-gradient(circle at top left, #ffe9d6 0, #f5f5f7 45%, #f5f5f7 100%);
-            color: var(--ink);
-            padding: 20px 16px 120px;
-            min-height: 100vh;
-        }
+  <!-- Для Android/Chrome -->
+  <link rel="icon" sizes="192x192" href="https://1tourtv.ru/wp-content/uploads/2025/08/icon192.png">
+  <meta name="mobile-web-app-capable" content="yes">
 
-        .container {
-            max-width: 640px;
-            margin: 0 auto;
-        }
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-        .header {
-            margin-bottom: 18px;
-        }
+  <title>Первый туристический — медиаплатформа</title>
 
-        .matvey-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 10px;
-            border-radius: 999px;
-            background: rgba(0, 0, 0, 0.04);
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--muted);
-            margin-bottom: 6px;
-        }
+  <style>
+    :root{
+      --brand:#f37021;
+      --brand2:#ff8a3c;
+      --ink:#0c0c10;
+      --card:#17191d;
+      --muted:#d0d4dd;       /* стало светлее */
+      --line:#23252a;
+      --white:#fff;
+      --gray-text:#eef0f5;   /* стало светлее */
+      --green:#22c55e;
+      --bg:#0b0c10;
+      --danger:#f97373;
+    }
 
-        .matvey-chip span {
-            background: var(--brand-grad);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
-        }
+    *{box-sizing:border-box}
+    html,body{height:100%}
 
-        h1 {
-            font-size: 22px;
-            line-height: 1.3;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--ink);
-        }
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--white);
+      font-family:'Montserrat',sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
 
-        .subtitle {
-            font-size: 13px;
-            color: var(--muted);
-        }
+    .page{
+      max-width:980px;
+      margin:0 auto;
+      padding:12px 14px 110px;
+    }
 
-        .summary-card {
-            margin-top: 16px;
-            background: var(--card);
-            border-radius: 20px;
-            padding: 16px;
-            box-shadow: var(--shadow);
-            position: relative;
-            overflow: hidden;
-        }
+    /* === Шапка === */
+    .hdr{
+      padding:14px;
+      background:#111;
+      border-radius:18px;
+      margin-bottom:16px;
+    }
+    .hdr__row{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .badge{
+      width:42px;
+      height:42px;
+      border-radius:999px;
+      display:grid;
+      place-items:center;
+      background:var(--brand);
+      color:#000;
+      font-weight:900;
+      font-size:16px;
+    }
+    .ttl{
+      font-size:22px;
+      font-weight:900;
+    }
+    .sub{
+      font-size:13px;
+      color:var(--muted);
+      font-weight:700;
+      margin-top:2px;
+    }
+    .intro{
+      margin-top:8px;
+      font-size:13px;
+      color:var(--gray-text);
+      font-weight:600;
+    }
 
-        .summary-card::before {
-            content: "";
-            position: absolute;
-            right: -40px;
-            top: -40px;
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(243,112,33,0.16), transparent 65%);
-        }
+    /* === Блоки статистики === */
+    .livebox{
+      background:#2b2b2d;
+      border-radius:18px;
+      padding:18px;
+      text-align:center;
+      margin-top:14px;
+      position:relative;
+      overflow:hidden;
+    }
+    .livebox .label{
+      font-size:15px;
+      color:#f5f5f5;
+      font-weight:800;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+    }
+    .livebox .value{
+      font-size:38px;
+      font-weight:800;
+      margin:6px 0;
+    }
+    .livebox .subtext{
+      font-size:13px;
+      color:var(--gray-text);
+    }
+    .orange-box{
+      background:linear-gradient(180deg,var(--brand2),var(--brand));
+      color:#000;
+      border-radius:16px;
+      padding:12px 12px 10px;
+      font-weight:800;
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+    }
+    .orange-box b{
+      display:block;
+      font-size:20px;
+    }
+    .orange-box span{
+      display:block;
+      font-size:12px;
+      opacity:.9;
+      font-weight:700;
+    }
+    .orange-box .tag{
+      font-size:13px;
+    }
+    .bar{
+      height:8px;
+      border-radius:999px;
+      overflow:hidden;
+      background:#0d0f13;
+      border:1px solid rgba(255,255,255,.06);
+      margin-top:12px;
+    }
+    .bar>span{
+      display:block;
+      height:100%;
+      width:58%;
+      background:linear-gradient(90deg,var(--brand),#ffb07a);
+    }
+    .meta{
+      margin-top:8px;
+      color:var(--gray-text);
+      font-weight:700;
+      font-size:12px;
+    }
 
-        .summary-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
+    .statwrap{
+      background:#fff;
+      color:#000;
+      border-radius:18px;
+      padding:16px;
+      margin-top:16px;
+    }
+    .statmain{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      gap:2px;
+    }
+    #bigStatNum{
+      font-size:32px;
+      font-weight:900;
+      white-space:nowrap;
+    }
+    .statmain-sub{
+      font-size:13px;
+      color:#444;
+      font-weight:800;
+      letter-spacing:.2px;
+    }
+    .statcards{
+      margin-top:14px;
+      display:grid;
+      gap:10px;
+    }
+    .statcard{
+      border-radius:14px;
+      padding:14px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border:1px solid transparent;
+    }
+    .st-orange{
+      background:linear-gradient(180deg,var(--brand2),var(--brand));
+      color:#000;
+      border-color:#ffb995;
+    }
+    .st-white{
+      background:#fff;
+      border-color:#e7e7e7;
+    }
+    .st-black{
+      background:#111;
+      color:#fff;
+      border-color:#2a2a2a;
+    }
+    .srcnote{
+      margin-top:10px;
+      font-size:12px;
+      color:#555;
+      text-align:center;
+    }
+    .icon-badge{
+      width:32px;
+      height:32px;
+      border-radius:50%;
+      display:grid;
+      place-items:center;
+      font-weight:900;
+      font-size:14px;
+    }
+    .green{background:#0fdc6b;color:#051}
+    .white{background:#fff;color:#000;border:1px solid #ccc}
 
-        .summary-text {
-            font-size: 12px;
-            color: var(--muted);
-            line-height: 1.5;
-        }
+    .section-label{
+      margin:20px 2px 8px;
+      font-size:14px;
+      color:var(--gray-text);
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.06em;
+    }
+    .platforms{
+      background:#1b1c20;
+      border-radius:16px;
+      padding:14px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:10px;
+      text-align:center;
+    }
+    .pblock{
+      border-radius:12px;
+      padding:12px 10px;
+      font-weight:800;
+      color:#000;
+      font-size:13px;
+      line-height:1.25;
+    }
+    .pblock small{
+      display:block;
+      font-size:11px;
+      opacity:.9;
+      margin-top:3px;
+    }
+    .p-all{background:#ffd966}
+    .p-site{background:#9ec5fe}
+    .p-iptv{background:#ffb07a}
+    .p-hotels{background:#90ee90}
+    .p-soc{background:#f8b4e3}
+    .p-partners{background:#cfcfcf}
 
-        .summary-highlight {
-            margin-top: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-        }
+    /* Кнопка перехода к калькулятору */
+    .cta-calc{
+      margin-top:18px;
+      display:flex;
+      justify-content:center;
+    }
+    .cta-calc button{
+      border:none;
+      border-radius:999px;
+      padding:12px 20px;
+      font-weight:800;
+      font-size:14px;
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      color:#000;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+    }
 
-        .summary-pill {
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: rgba(243,112,33,0.07);
-            border: 1px solid rgba(243,112,33,0.25);
-            font-weight: 600;
-            font-size: 11px;
-        }
+    /* === Калькулятор бюджета === */
 
-        .steps-strip {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 22px 0 10px;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted);
-        }
+    .calc-wrap{
+      margin-top:26px;
+      background:linear-gradient(180deg,#14161b,#0b0c10);
+      border-radius:20px;
+      padding:18px 16px 18px;
+      border:1px solid #262a30;
+    }
 
-        .steps-bar {
-            flex: 1;
-            height: 4px;
-            border-radius: 999px;
-            background: #e1e2ea;
-            position: relative;
-            overflow: hidden;
-        }
+    .calc-header{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      margin-bottom:12px;
+    }
+    .calc-title{
+      font-size:19px;
+      font-weight:900;
+    }
+    .calc-subtitle{
+      font-size:13px;
+      color:var(--gray-text);
+      font-weight:600;
+    }
 
-        .steps-bar-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            height: 4px;
-            width: 100%;
-            border-radius: 999px;
-            background: var(--brand-grad);
-            transform-origin: left center;
-            transform: scaleX(0.9);
-        }
+    .calc-section{
+      background:#1a1b20;
+      border-radius:16px;
+      padding:16px;
+      margin-top:10px;
+      border:1px solid #262a30;
+    }
+    .calc-section-title{
+      font-size:15px;
+      font-weight:800;
+      margin-bottom:10px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:8px;
+    }
+    .badge-step{
+      font-size:10px;
+      text-transform:uppercase;
+      letter-spacing:.04em;
+      padding:3px 7px;
+      border-radius:999px;
+      background:#23252b;
+      color:var(--muted);
+      font-weight:800;
+      flex-shrink:0;
+    }
 
-        .step-number {
-            font-weight: 600;
-            color: var(--brand);
-        }
+    .package-card{
+      background:#101116;
+      border:1px solid #30323a;
+      border-radius:12px;
+      padding:14px;
+      margin-bottom:10px;
+      cursor:pointer;
+      transition:all .2s;
+      position:relative;
+    }
+    .package-card:last-child{
+      margin-bottom:0;
+    }
+    .package-card:active{
+      transform:scale(0.985);
+    }
+    .package-card.selected{
+      border-color:var(--brand);
+      box-shadow:0 8px 20px rgba(243,112,33,.35);
+      background:radial-gradient(circle at top left,rgba(243,112,33,.22),#101116);
+    }
+    .package-header{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom:6px;
+    }
+    .package-name{
+      font-size:17px;
+      font-weight:800;
+      text-transform:uppercase;
+    }
+    .package-desc{
+      font-size:12px;
+      color:var(--gray-text);
+      margin-top:2px;
+    }
+    .package-price{
+      font-size:20px;
+      font-weight:800;
+      color:var(--brand);
+      white-space:nowrap;
+    }
+    .package-meta{
+      font-size:11px;
+      color:var(--gray-text);
+      margin-top:4px;
+    }
 
-        .section {
-            background: var(--card);
-            border-radius: var(--radius);
-            padding: 14px 14px 12px;
-            margin-bottom: 14px;
-            border: 1px solid rgba(0, 0, 0, 0.03);
-            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
-        }
+    .package-features{
+      display:flex;
+      flex-direction:column;
+      gap:5px;
+      margin-top:6px;
+      font-size:12px;
+      color:var(--gray-text);
+    }
+    .feature{
+      display:flex;
+      align-items:flex-start;
+      gap:6px;
+    }
+    .feature::before{
+      content:'✓';
+      font-size:13px;
+      color:var(--green);
+      margin-top:1px;
+      flex-shrink:0;
+    }
 
-        .section-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+    .checkbox-option{
+      background:#101116;
+      border:1px solid #30323a;
+      border-radius:12px;
+      padding:12px;
+      margin-bottom:8px;
+      cursor:pointer;
+      transition:all .2s;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .checkbox-option:last-child{
+      margin-bottom:0;
+    }
+    .checkbox-option:active{
+      transform:scale(0.985);
+    }
+    .checkbox-option.selected{
+      border-color:var(--brand);
+      background:radial-gradient(circle at top left,rgba(243,112,33,.18),#101116);
+    }
 
-        .section-caption {
-            font-size: 11px;
-            color: var(--muted);
-            margin-bottom: 10px;
-        }
+    .checkbox{
+      width:22px;
+      height:22px;
+      border-radius:7px;
+      border:1px solid #3d4048;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      flex-shrink:0;
+      font-size:14px;
+      color:var(--white);
+    }
+    .checkbox-option.selected .checkbox{
+      background:var(--brand);
+      border-color:var(--brand);
+    }
+    .checkbox-option.selected .checkbox::after{
+      content:'✓';
+      font-weight:800;
+    }
 
-        .tagline {
-            font-size: 11px;
-            color: var(--muted);
-            font-style: italic;
-        }
+    .option-content{
+      flex:1;
+      min-width:0;
+    }
+    .option-text{
+      font-size:14px;
+      font-weight:700;
+    }
+    .option-subtitle{
+      font-size:11px;
+      color:var(--gray-text);
+      margin-top:2px;
+    }
+    .price-badge{
+      font-size:14px;
+      font-weight:800;
+      color:var(--brand);
+      white-space:nowrap;
+    }
 
-        .pill-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 6px;
-        }
+    /* Итог */
+    .total-box{
+      margin-top:14px;
+      background:#08090c;
+      border-radius:16px;
+      padding:14px;
+      border:1px solid #30323a;
+    }
+    .total-row{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .total-label{
+      font-size:13px;
+      color:var(--gray-text);
+      font-weight:700;
+    }
+    .total-amount{
+      font-size:26px;
+      font-weight:900;
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      -webkit-background-clip:text;
+      -webkit-text-fill-color:transparent;
+      background-clip:text;
+      white-space:nowrap;
+    }
+    .total-breakdown{
+      margin-top:8px;
+      font-size:12px;
+      color:var(--gray-text);
+      line-height:1.45;
+    }
+    .total-breakdown.empty{
+      opacity:.9;
+      font-style:italic;
+    }
 
-        .pill {
-            padding: 6px 10px;
-            border-radius: 999px;
-            border: 1px solid var(--line);
-            font-size: 11px;
-            cursor: pointer;
-            background: #fafafa;
-            color: var(--muted);
-            transition: all 0.2s ease;
-            white-space: nowrap;
-        }
+    .total-note{
+      margin-top:6px;
+      font-size:11px;
+      color:var(--muted);
+    }
 
-        .pill.selected {
-            border-color: rgba(243,112,33,0.5);
-            background: rgba(243,112,33,0.12);
-            color: var(--ink);
-            font-weight: 600;
-        }
+    /* === Нижняя панель с кнопками === */
+    .footer-actions{
+      position:fixed;
+      left:0;
+      right:0;
+      bottom:0;
+      padding:8px 10px 10px;
+      background:rgba(5,6,10,.96);
+      border-top:1px solid #22242a;
+      backdrop-filter:blur(14px);
+      z-index:50;
+    }
+    .footer-inner{
+      max-width:980px;
+      margin:0 auto;
+      display:flex;
+      gap:8px;
+    }
+    .btn-ghost,
+    .btn-primary{
+      flex:1;
+      border-radius:999px;
+      padding:11px 14px;
+      font-size:13px;
+      font-weight:800;
+      border:none;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      white-space:nowrap;
+    }
+    .btn-ghost{
+      background:#15161b;
+      color:var(--gray-text);
+      border:1px solid #30323a;
+    }
+    .btn-primary{
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      color:#000;
+    }
 
-        .choice-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            margin-top: 8px;
-        }
-
-        @media (min-width: 480px) {
-            .choice-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .choice-card {
-            position: relative;
-            padding: 10px 10px 9px;
-            border-radius: 14px;
-            border: 1px solid var(--line);
-            background: #fafafa;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .choice-card:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
-        }
-
-        .choice-card.selected {
-            border-color: rgba(243,112,33,0.6);
-            background: #fff7f0;
-            box-shadow: 0 10px 24px rgba(243,112,33,0.22);
-        }
-
-        .choice-title-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            gap: 8px;
-            margin-bottom: 4px;
-        }
-
-        .choice-name {
-            font-size: 13px;
-            font-weight: 600;
-        }
-
-        .choice-price {
-            font-size: 14px;
-            font-weight: 700;
-            background: var(--brand-grad);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .choice-desc {
-            font-size: 11px;
-            color: var(--muted);
-            line-height: 1.45;
-            margin-bottom: 4px;
-        }
-
-        .choice-meta {
-            font-size: 10px;
-            color: var(--muted);
-        }
-
-        .chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 2px 6px;
-            border-radius: 999px;
-            font-size: 10px;
-            background: rgba(16,185,129,0.1);
-            color: #047857;
-            font-weight: 600;
-        }
-
-        .extras-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .extra {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 10px;
-            border-radius: 12px;
-            border: 1px solid var(--line);
-            background: #fafafa;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .extra.selected {
-            border-color: rgba(243,112,33,0.6);
-            background: #fff7f0;
-        }
-
-        .extra-main {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        .extra-title {
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .extra-sub {
-            font-size: 10px;
-            color: var(--muted);
-        }
-
-        .extra-price {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--brand);
-        }
-
-        .checkbox {
-            width: 18px;
-            height: 18px;
-            border-radius: 6px;
-            border: 1px solid var(--line);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            margin-left: 10px;
-            font-size: 12px;
-            color: var(--brand);
-        }
-
-        .extra.selected .checkbox {
-            border-color: var(--brand);
-            background: #ffe4d1;
-        }
-
-        .inline-note {
-            font-size: 10px;
-            color: var(--muted);
-            margin-top: 4px;
-        }
-
-        .stats-card {
-            margin-top: 8px;
-            border-radius: 14px;
-            border: 1px dashed rgba(0,0,0,0.08);
-            padding: 8px;
-            background: #fafafa;
-        }
-
-        .stats-title {
-            font-size: 11px;
-            font-weight: 600;
-            margin-bottom: 6px;
-        }
-
-        .stats-iframe {
-            width: 100%;
-            height: 220px;
-            border: none;
-            border-radius: 10px;
-            background: #000;
-        }
-
-        .total-section {
-            position: fixed;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(245,245,247,0.96);
-            backdrop-filter: blur(14px);
-            border-top: 1px solid rgba(0,0,0,0.06);
-            padding: 10px 16px 18px;
-        }
-
-        .total-inner {
-            max-width: 640px;
-            margin: 0 auto;
-        }
-
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-        }
-
-        .total-label {
-            font-size: 11px;
-            color: var(--muted);
-        }
-
-        .total-amount {
-            font-size: 22px;
-            font-weight: 700;
-            background: var(--brand-grad);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .total-desc {
-            font-size: 11px;
-            color: var(--muted);
-            margin-top: 4px;
-            line-height: 1.4;
-        }
-
-        .total-desc strong {
-            color: var(--ink);
-            font-weight: 600;
-        }
-
-        .hint {
-            font-size: 10px;
-            color: var(--muted);
-            margin-top: 4px;
-        }
-    </style>
+    @media (max-width:640px){
+      .page{padding-bottom:120px}
+      .footer-inner{flex-direction:row}
+      .package-header{flex-direction:column;align-items:flex-start}
+      .total-amount{font-size:22px}
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-    <div class="header">
-        <div class="matvey-chip">
-            🤝 <span>Матвей Соколовский</span> · ваш продюсер
+  <div class="page">
+    <!-- Шапка -->
+    <header class="hdr">
+      <div class="hdr__row">
+        <div class="badge">TV</div>
+        <div>
+          <div class="ttl">Первый туристический</div>
+          <div class="sub">Медиаплатформа • 24/7 • Россия и мир</div>
+          <div class="intro">Это не просто канал — это медиаплатформа, которая показывает вам живую статистику прямо сейчас.</div>
         </div>
-        <h1>Соберём вашу кампанию<br>на Первом туристическом</h1>
-        <div class="subtitle">
-            Я уже запомнил, о чём мы говорили в чате. Сейчас за минуту покажу честный бюджет и формат кампании.
+      </div>
+    </header>
+
+    <!-- Онлайн статистика -->
+    <section class="livebox" id="live">
+      <div class="label">СЕЙЧАС В ЭФИРЕ</div>
+      <div class="value" id="nowWatch">0</div>
+      <div class="subtext">зрителей на всех носителях</div>
+
+      <div class="grid2" style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div class="orange-box">
+          <span class="tag">🏖️ В отелях Турции</span>
+          <b id="turWatch">0</b>
         </div>
-        <div class="summary-card">
-            <div class="summary-title">Что мы делаем на этом шаге</div>
-            <div class="summary-text">
-                Фиксируем цель, выбираем силу кампании и решаем, нужны ли съёмки и блогеры.
-                Без навязывания и с понятным ориентиром по деньгам.
-            </div>
-            <div class="summary-highlight">
-                <div class="summary-pill">Клиент уже тёплый — считаем финальный сценарий 👌</div>
-            </div>
+        <div class="orange-box">
+          <span class="tag">🏨 В отелях России</span>
+          <b id="rusWatch">0</b>
         </div>
+      </div>
+
+      <div class="bar">
+        <span id="prog"></span>
+      </div>
+      <div class="meta" id="nextShow">Следующая программа через 18 мин</div>
+    </section>
+
+    <!-- Белая статистика -->
+    <section class="statwrap">
+      <div class="statmain">
+        <span id="bigStatNum">0</span>
+        <div class="statmain-sub">аудитория медиаплатформы в месяц</div>
+      </div>
+
+      <div class="statcards">
+        <div class="statcard st-orange">
+          <div class="icon-badge white">×6</div>
+          <span>Рост за 3 года • ×6 к суммарной аудитории медиаплатформы</span>
+        </div>
+        <div class="statcard st-white">
+          <div class="icon-badge green">👥</div>
+          <span>Женщины 51% • Мужчины 49% • Возраст ядра 25–65</span>
+        </div>
+        <div class="statcard st-black">
+          <div class="icon-badge green">↑</div>
+          <span>Среднее время просмотра • 40–70 минут</span>
+        </div>
+      </div>
+
+      <div class="srcnote">По данным Mediascope, Яндекс, IPTV, SimilarWeb</div>
+    </section>
+
+    <!-- Распределение по платформам -->
+    <div class="section-label">Где нас смотрят</div>
+    <div class="platforms">
+      <div class="pblock p-all">
+        1 200 000
+        <small>Суммарная аудитория</small>
+      </div>
+      <div class="pblock p-site">
+        30 000
+        <small>Сайт</small>
+      </div>
+      <div class="pblock p-iptv">
+        450 000
+        <small>IPTV</small>
+      </div>
+      <div class="pblock p-hotels">
+        300 000
+        <small>Отели</small>
+      </div>
+      <div class="pblock p-soc">
+        300 000
+        <small>Соцсети</small>
+      </div>
+      <div class="pblock p-partners">
+        120 000
+        <small>Партнёры</small>
+      </div>
     </div>
 
-    <div class="steps-strip">
-        <span class="step-number">ШАГИ</span>
-        <div class="steps-bar">
-            <div class="steps-bar-fill"></div>
-        </div>
-        <span>1–3</span>
+    <!-- Кнопка перехода к калькулятору -->
+    <div class="cta-calc">
+      <button type="button" id="toCalcBtn">
+        💰 Перейти к расчёту кампании
+      </button>
     </div>
 
-    <!-- ШАГ 1: Цель кампании -->
-    <section class="section" id="step-goal">
-        <div class="section-title">
-            🎯 Шаг 1. Цель кампании
-            <span class="tagline">чтобы мы говорили с вашей аудиторией правильно</span>
+    <!-- КАЛЬКУЛЯТОР -->
+    <section class="calc-wrap" id="calculator">
+      <div class="calc-header">
+        <div class="calc-title">Соберите свою кампанию</div>
+        <div class="calc-subtitle">
+          Выберите пакет, добавьте производство и блогеров — сразу увидите ориентировочный бюджет.
         </div>
-        <div class="section-caption">
-            Если Матвей уже зафиксировал цель в чате — здесь просто проверьте, всё ли верно.
-        </div>
-        <div class="pill-row" id="goalPills">
-            <button class="pill selected" data-value="Узнаваемость бренда">Узнаваемость бренда</button>
-            <button class="pill" data-value="Поток клиентов/броней">Поток клиентов / броней</button>
-            <button class="pill" data-value="Имидж и статус">Имидж и статус</button>
-            <button class="pill" data-value="Лояльность и доверие">Лояльность и доверие</button>
-        </div>
-    </section>
+      </div>
 
-    <!-- ШАГ 2: Размер кампании -->
-    <section class="section" id="step-size">
-        <div class="section-title">
-            📺 Шаг 2. Масштаб кампании
-            <span class="tagline">без "всё или ничего"</span>
-        </div>
-        <div class="section-caption">
-            Выберите уровень. В любой момент бюджет можно будет усилить или, наоборот, ужать.
+      <!-- Пакеты размещения -->
+      <div class="calc-section" id="section-packages">
+        <div class="calc-section-title">
+          <span>Пакет размещения</span>
+          <span class="badge-step">шаг 1</span>
         </div>
 
-        <div class="choice-grid" id="intensityGrid">
-            <div class="choice-card selected" data-id="light" data-price="350000">
-                <div class="choice-title-row">
-                    <div class="choice-name">Лёгкий тест</div>
-                    <div class="choice-price">≈ 350 000 ₽</div>
-                </div>
-                <div class="choice-desc">
-                    1–2 недели в эфире, первые замеры отклика, мягкий вход без «прожига бюджета».
-                </div>
-                <div class="choice-meta">
-                    <span class="chip">Для проверки гипотез</span>
-                </div>
-            </div>
-
-            <div class="choice-card" data-id="standard" data-price="700000">
-                <div class="choice-title-row">
-                    <div class="choice-name">Уверенный старт</div>
-                    <div class="choice-price">≈ 700 000 ₽</div>
-                </div>
-                <div class="choice-desc">
-                    3 недели: стабильная ротация в эфире + соцсети + IPTV/отели. Уже похоже на настоящую кампанию.
-                </div>
-                <div class="choice-meta">
-                    <span class="chip">Оптимальный вариант</span>
-                </div>
-            </div>
-
-            <div class="choice-card" data-id="strong" data-price="1200000">
-                <div class="choice-title-row">
-                    <div class="choice-name">Мощный запуск</div>
-                    <div class="choice-price">≈ 1 200 000 ₽</div>
-                </div>
-                <div class="choice-desc">
-                    4–6 недель: максимум охвата, кросс-промо, плотное присутствие в эфире и в цифре.
-                </div>
-                <div class="choice-meta">
-                    <span class="chip">Когда нужно «вау, мы везде»</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ШАГ 3: Материалы и усилители -->
-    <section class="section" id="step-extras">
-        <div class="section-title">
-            🎬 Шаг 3. Материалы и усилители
-            <span class="tagline">ролик, блогеры и немного магии</span>
-        </div>
-        <div class="section-caption">
-            Отметьте, что нужно добавить к размещению. Здесь мы уже не "продаём", а честно собираем рабочий комплект.
-        </div>
-
-        <div class="extras-grid" id="productionExtras">
-            <div class="extra selected" data-id="have-spot" data-price="0">
-                <div class="extra-main">
-                    <div class="extra-title">Ролик уже есть</div>
-                    <div class="extra-sub">Мы адаптируем его под эфир и соцсети без доплаты.</div>
-                </div>
-                <div class="extra-price">0 ₽</div>
-                <div class="checkbox">✓</div>
-            </div>
-
-            <div class="extra" data-id="adapt-spot" data-price="70000">
-                <div class="extra-main">
-                    <div class="extra-title">Адаптация существующего ролика</div>
-                    <div class="extra-sub">Подрежем, дополним титрами, сделаем версию для эфира и Reels.</div>
-                </div>
-                <div class="extra-price">+ 70 000 ₽</div>
-                <div class="checkbox"></div>
-            </div>
-
-            <div class="extra" data-id="new-spot" data-price="180000">
-                <div class="extra-main">
-                    <div class="extra-title">Съёмка нового ролика</div>
-                    <div class="extra-sub">Продакшн «под ключ»: сценарий, съёмка, монтаж, озвучка.</div>
-                </div>
-                <div class="extra-price">от 180 000 ₽</div>
-                <div class="checkbox"></div>
-            </div>
-        </div>
-
-        <div class="inline-note">
-            При съёмке в регионах к бюджету можем добавить выезд команды — это обсудим уже с живым менеджером.
-        </div>
-
-        <div class="extras-grid" id="bloggerExtras" style="margin-top: 10px;">
-            <div class="extra" data-id="no-bloggers" data-price="0">
-                <div class="extra-main">
-                    <div class="extra-title">Без блогеров</div>
-                    <div class="extra-sub">Только телеканал, соцсети и отельная сеть.</div>
-                </div>
-                <div class="extra-price">0 ₽</div>
-                <div class="checkbox"></div>
-            </div>
-
-            <div class="extra selected" data-id="one-blogger" data-price="120000">
-                <div class="extra-main">
-                    <div class="extra-title">+ 1 нишевой блогер</div>
-                    <div class="extra-sub">Живой рассказ от автора с вашей целевой аудиторией.</div>
-                </div>
-                <div class="extra-price">≈ 120 000 ₽</div>
-                <div class="checkbox">✓</div>
-            </div>
-
-            <div class="extra" data-id="three-bloggers" data-price="260000">
-                <div class="extra-main">
-                    <div class="extra-title">+ 2–3 блогера</div>
-                    <div class="extra-sub">Серия интеграций — вас точно заметят.</div>
-                </div>
-                <div class="extra-price">≈ 260 000 ₽</div>
-                <div class="checkbox"></div>
-            </div>
-        </div>
-
-        <div class="inline-note">
-            Конкретные блогеры и точные гонорары мы согласуем персонально. Здесь — ориентир по уровню.
-        </div>
-
-        <div class="stats-card">
-            <div class="stats-title">📊 Живая статистика канала</div>
-            <div class="inline-note" style="margin-bottom:6px;">
-                Чтобы вы видели, что за цифрами стоит реальный канал, а не презентация.
-            </div>
-            <iframe class="stats-iframe" src="https://1tourtv.ru/compas1/tourcompas/"></iframe>
-        </div>
-    </section>
-</div>
-
-<div class="total-section">
-    <div class="total-inner">
-        <div class="total-row">
+        <div class="package-card" data-type="package" data-value="MINI" data-price="450000">
+          <div class="package-header">
             <div>
-                <div class="total-label">Ориентировочный бюджет кампании</div>
-                <div class="total-amount" id="totalAmount">470 000 ₽</div>
+              <div class="package-name">MINI</div>
+              <div class="package-desc">Стартовая кампания, когда нужно аккуратно протестировать канал.</div>
+              <div class="package-meta">10 дней • эфир + сайт • до 10 минут в ротации</div>
             </div>
+            <div class="package-price">450 000 ₽</div>
+          </div>
+          <div class="package-features">
+            <div class="feature">Быстрый запуск в течение нескольких дней</div>
+            <div class="feature">Ротация в эфире + поддержка на сайте</div>
+            <div class="feature">Отчёт по показам и выходам</div>
+          </div>
         </div>
-        <div class="total-desc" id="breakdown">
-            Лёгкий тест (≈ 350 000 ₽) + ролик есть (0 ₽) + 1 нишевой блогер (≈ 120 000 ₽).
-        </div>
-        <div class="hint">
-            Это честный ориентир, а не окончательный счёт. Матвей свяжется, подстроит детали и вышлет договор.
-        </div>
-    </div>
-</div>
 
-<script>
-    const tg = window.Telegram.WebApp || {};
-    if (tg.ready) {
-        tg.ready();
-        tg.expand && tg.expand();
-        tg.MainButton.setText('Отправить Матвею и согласовать договор');
-        tg.MainButton.show();
+        <div class="package-card" data-type="package" data-value="HIT" data-price="600000">
+          <div class="package-header">
+            <div>
+              <div class="package-name">HIT</div>
+              <div class="package-desc">Баланс охвата и частоты — кампания “чтобы запомнили”.</div>
+              <div class="package-meta">20 дней • эфир + сайт + соцсети • ~15 минут в пакете</div>
+            </div>
+            <div class="package-price">600 000 ₽</div>
+          </div>
+          <div class="package-features">
+            <div class="feature">Регулярные выходы в эфире в течение 3 недель</div>
+            <div class="feature">Поддержка в соцсетях канала</div>
+            <div class="feature">Рекомендации по оптимальной частоте контакта</div>
+          </div>
+        </div>
+
+        <div class="package-card" data-type="package" data-value="OPTIMA" data-price="900000">
+          <div class="package-header">
+            <div>
+              <div class="package-name">OPTIMA</div>
+              <div class="package-desc">Когда нужно “раскачать” бренд и собрать максимум внимания.</div>
+              <div class="package-meta">30 дней • эфир + сайт + соцсети + партнёры • ~30 минут</div>
+            </div>
+            <div class="package-price">900 000 ₽</div>
+          </div>
+          <div class="package-features">
+            <div class="feature">Месяц стабильного присутствия в сети каналов</div>
+            <div class="feature">Кросс-промо на партнёрских площадках</div>
+            <div class="feature">Возможность интеграции спецрубрики</div>
+          </div>
+        </div>
+
+        <div class="package-card" data-type="package" data-value="PRO" data-price="1500000">
+          <div class="package-header">
+            <div>
+              <div class="package-name">PRO</div>
+              <div class="package-desc">История “мы здесь надолго”: максимальная свобода и спецпроект.</div>
+              <div class="package-meta">Индивидуальные сроки • все носители • ~45 минут</div>
+            </div>
+            <div class="package-price">1 500 000 ₽</div>
+          </div>
+          <div class="package-features">
+            <div class="feature">Спецпроект под задачи бренда</div>
+            <div class="feature">Гибкий медиаплан, пересборка по ходу кампании</div>
+            <div class="feature">Персональный продюсер проекта</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Производство ролика -->
+      <div class="calc-section">
+        <div class="calc-section-title">
+          <span>Производство ролика / фильма</span>
+          <span class="badge-step">дополнительно</span>
+        </div>
+
+        <div class="checkbox-option" data-type="production" data-value="base" data-price="50000">
+          <div class="checkbox"></div>
+          <div class="option-content">
+            <div class="option-text">Базовый ролик до 60 сек</div>
+            <div class="option-subtitle">Из ваших материалов, с титрами и логотипами</div>
+          </div>
+          <div class="price-badge">50 000 ₽</div>
+        </div>
+
+        <div class="checkbox-option" data-type="production" data-value="shoot-msk" data-price="150000">
+          <div class="checkbox"></div>
+          <div class="option-content">
+            <div class="option-text">Съёмка в Москве</div>
+            <div class="option-subtitle">Выездная команда, оператор + режиссёр</div>
+          </div>
+          <div class="price-badge">+150 000 ₽</div>
+        </div>
+
+        <div class="checkbox-option" data-type="production" data-value="shoot-region" data-price="200000">
+          <div class="checkbox"></div>
+          <div class="option-content">
+            <div class="option-text">Съёмка в регионе / на курорте</div>
+            <div class="option-subtitle">С учётом дороги и проживания команды</div>
+          </div>
+          <div class="price-badge">+200 000 ₽</div>
+        </div>
+
+        <div class="checkbox-option" data-type="production" data-value="voice" data-price="20000">
+          <div class="checkbox"></div>
+          <div class="option-content">
+            <div class="option-text">Профессиональная озвучка</div>
+            <div class="option-subtitle">Дикторский голос под стиль вашего бренда</div>
+          </div>
+          <div class="price-badge">+20 000 ₽</div>
+        </div>
+
+        <div class="checkbox-option" data-type="production" data-value="graphics" data-price="20000">
+          <div class="checkbox"></div>
+          <div class="option-content">
+            <div class="option-text">Графика и анимация</div>
+            <div class="option-subtitle">До 10 секунд фирменной анимации</div>
+          </div>
+          <div class="price-badge">+20 000 ₽</div>
+        </div>
+
+        <div class="checkbox-option" data-type="production" data-value="creative" data-price="50000">
+          <div class="checkbox"></div>
+          <div class="option-content">
+            <div class="option-text">Креатив и сценарий</div>
+            <div class="option-subtitle">Продюсер + сценарист, чтобы это смотрели</div>
+          </div>
+          <div class="price-badge">+50 000 ₽</div>
+        </div>
+
+        <div class="checkbox-option" data-type="production" data-value="actors" data-price="100000">
+          <div class="checkbox"></div>
+          <div class="option-content">
+            <div class="option-text">Актёры и ведущие</div>
+            <div class="option-subtitle">Кастинг, подбор и съёмка с участниками</div>
+          </div>
+          <div class="price-badge">+100 000 ₽</div>
+        </div>
+      </div>
+
+      <!-- Блогеры -->
+      <div class="calc-section">
+        <div class="calc-section-title">
+          <span>Блогерская интеграция</span>
+          <span class="badge-step">по желанию</span>
+        </div>
+
+        <div class="checkbox-option" data-type="blogger" data-value="top" data-price="150000">
+          <div class="checkbox"></div>
+          <div class="option-content">
+            <div class="option-text">ТОП-блогер</div>
+            <div class="option-subtitle">От 50 000 подписчиков, 15–30 минут “реальный опыт”</div>
+          </div>
+          <div class="price-badge">150 000 ₽</div>
+        </div>
+
+        <div class="checkbox-option" data-type="blogger" data-value="mega" data-price="300000">
+          <div class="checkbox"></div>
+          <div class="option-content">
+            <div class="option-text">МЕГА-блогер</div>
+            <div class="option-subtitle">От 300 000 подписчиков, отдельный выпуск программы</div>
+          </div>
+          <div class="price-badge">300 000 ₽</div>
+        </div>
+
+        <div class="checkbox-option" data-type="blogger" data-value="super" data-price="600000">
+          <div class="checkbox"></div>
+          <div class="option-content">
+            <div class="option-text">СУПЕР-блогер</div>
+            <div class="option-subtitle">Федеральный уровень + кросс-постинг на наши площадки</div>
+          </div>
+          <div class="price-badge">600 000 ₽</div>
+        </div>
+      </div>
+
+      <!-- Итог -->
+      <div class="total-box">
+        <div class="total-row">
+          <div class="total-label">Итого ориентировочно:</div>
+          <div class="total-amount" id="totalAmount">0 ₽</div>
+        </div>
+        <div class="total-breakdown empty" id="breakdown">
+          Вы ещё не выбрали пакет и опции — соберите кампанию, и здесь появится ориентировочный бюджет.
+        </div>
+        <div class="total-note">
+          Итоговая смета уточняется продюсером: можно менять длительность, носители и перенастраивать акценты.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Нижние кнопки -->
+  <div class="footer-actions">
+    <div class="footer-inner">
+      <button class="btn-ghost" type="button" id="backToChatBtn">
+        ⬅ Назад в Telegram
+      </button>
+      <button class="btn-primary" type="button" id="scrollToCalcBtn">
+        💰 К расчёту кампании
+      </button>
+    </div>
+  </div>
+
+  <script>
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+
+    if (tg) {
+      tg.ready();
+      tg.expand();
+      tg.MainButton.setText('Отправить продюсеру — он свяжется с вами');
+      tg.MainButton.hide(); // покажем после выбора пакета
     }
 
-    const state = {
-        goal: 'Узнаваемость бренда',
-        intensity: {
-            id: 'light',
-            name: 'Лёгкий тест',
-            price: 350000
-        },
-        production: {
-            id: 'have-spot',
-            name: 'Ролик уже есть',
-            price: 0
-        },
-        bloggers: {
-            id: 'one-blogger',
-            name: '1 нишевой блогер',
-            price: 120000
+    const fmt = n => (n).toLocaleString('ru-RU');
+
+    // Анимация месячной аудитории
+    (function(){
+      const el = document.getElementById('bigStatNum');
+      let val = 0;
+      const target = 1200000;
+      const step = Math.round(target / 80);
+      const timer = setInterval(()=>{
+        val += step;
+        if (val >= target){
+          val = target;
+          clearInterval(timer);
         }
+        el.textContent = fmt(val);
+      }, 40);
+    })();
+
+    // Онлайн-цифры "сейчас смотрят"
+    (function(){
+      const elNow = document.getElementById('nowWatch');
+      const elTur = document.getElementById('turWatch');
+      const elRus = document.getElementById('rusWatch');
+      const elProg = document.getElementById('prog');
+      const elNext = document.getElementById('nextShow');
+      const rnd = (min,max)=>Math.floor(Math.random()*(max-min+1))+min;
+
+      let now = 186540, tur = 72300, rus = 45200, nextM = 18;
+
+      function paint(){
+        elNow.textContent = fmt(now);
+        elTur.textContent = fmt(tur);
+        elRus.textContent = fmt(rus);
+        elProg.style.width = Math.min(100, 25 + Math.round((now/350000)*75)) + '%';
+        elNext.textContent = 'Следующая программа через ' + nextM + ' мин';
+      }
+
+      paint();
+
+      setInterval(()=>{
+        const step = Math.max(200, Math.round(now*(Math.random()*0.012+0.004)));
+        now = Math.max(60000, Math.min(350000, now + (Math.random()<.5 ? -step : step)));
+        const tStep = rnd(300, 2400);
+        const rStep = rnd(300, 1800);
+        tur = Math.max(20000, Math.min(120000, tur + (Math.random()<.5 ? -tStep : tStep)));
+        rus = Math.max(10000, Math.min(100000, rus + (Math.random()<.5 ? -rStep : rStep)));
+        if (tur < rus) tur += rnd(800,2200);
+        nextM = Math.max(1, nextM + (Math.random()<.5 ? -1 : 1));
+        paint();
+      }, rnd(4500,8000));
+    })();
+
+    // Скролл к калькулятору
+    const toCalcBtn = document.getElementById('toCalcBtn');
+    const scrollToCalcBtn = document.getElementById('scrollToCalcBtn');
+    const calcSection = document.getElementById('calculator');
+
+    function scrollToCalc(){
+      calcSection.scrollIntoView({behavior:'smooth',block:'start'});
+      if (tg) {
+        try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+      }
+    }
+
+    toCalcBtn.addEventListener('click', scrollToCalc);
+    scrollToCalcBtn.addEventListener('click', scrollToCalc);
+
+    // Кнопка "Назад в Telegram"
+    const backToChatBtn = document.getElementById('backToChatBtn');
+    backToChatBtn.addEventListener('click', ()=>{
+      if (tg) {
+        try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+        tg.close();
+      } else {
+        window.history.back();
+      }
+    });
+
+    // Калькулятор
+    const totalEl = document.getElementById('totalAmount');
+    const breakdownEl = document.getElementById('breakdown');
+
+    let selected = {
+      package: null,
+      production: [],
+      blogger: null
     };
 
-    function formatRub(num) {
-        return num.toLocaleString('ru-RU') + ' ₽';
+    function calculateTotal(){
+      if (!selected.package){
+        totalEl.textContent = '0 ₽';
+        breakdownEl.classList.add('empty');
+        breakdownEl.textContent = 'Вы ещё не выбрали пакет и опции — соберите кампанию, и здесь появится ориентировочный бюджет.';
+        if (tg) tg.MainButton.hide();
+        return 0;
+      }
+
+      let total = selected.package.price;
+      const parts = [
+        `Пакет ${selected.package.name} (${(selected.package.price/1000).toFixed(0)} т₽)`
+      ];
+
+      if (selected.production.length){
+        const prodTotal = selected.production.reduce((sum,p)=>sum+p.price,0);
+        total += prodTotal;
+        parts.push(`Производство (${(prodTotal/1000).toFixed(0)} т₽: ${selected.production.map(p=>p.name).join(', ')})`);
+      }
+
+      if (selected.blogger){
+        total += selected.blogger.price;
+        parts.push(`Блогер (${(selected.blogger.price/1000).toFixed(0)} т₽: ${selected.blogger.name})`);
+      }
+
+      totalEl.textContent = total.toLocaleString('ru-RU') + ' ₽';
+      breakdownEl.classList.remove('empty');
+      breakdownEl.textContent = parts.join(' + ');
+
+      if (tg){
+        tg.MainButton.show();
+      }
+
+      return total;
     }
 
-    function updateTotal() {
-        const base = state.intensity.price;
-        const prod = state.production.price;
-        const blog = state.bloggers.price;
+    // Пакеты (radio)
+    document.querySelectorAll('[data-type="package"]').forEach(card=>{
+      card.addEventListener('click', ()=>{
+        document.querySelectorAll('[data-type="package"]').forEach(c=>c.classList.remove('selected'));
+        card.classList.add('selected');
 
-        const total = base + prod + blog;
+        selected.package = {
+          name: card.dataset.value,
+          price: parseInt(card.dataset.price,10)
+        };
 
-        const totalEl = document.getElementById('totalAmount');
-        const breakdownEl = document.getElementById('breakdown');
+        if (tg){
+          try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+        }
+        calculateTotal();
+      });
+    });
 
-        if (totalEl) {
-            totalEl.textContent = formatRub(total);
+    // Производство (multi-checkbox)
+    document.querySelectorAll('[data-type="production"]').forEach(option=>{
+      option.addEventListener('click', ()=>{
+        option.classList.toggle('selected');
+
+        const name = option.querySelector('.option-text').textContent.trim();
+        const price = parseInt(option.dataset.price,10);
+
+        if (option.classList.contains('selected')){
+          selected.production.push({name,price});
+        } else {
+          selected.production = selected.production.filter(p=>p.name!==name);
         }
 
-        if (breakdownEl) {
-            const parts = [];
-            parts.push(`${state.intensity.name} (≈ ${formatRub(state.intensity.price)})`);
-            parts.push(`${state.production.name} (${state.production.price === 0 ? '0 ₽' : '≈ ' + formatRub(state.production.price)})`);
-            parts.push(state.bloggers.price === 0
-                ? 'без блогеров'
-                : `${state.bloggers.name} (≈ ${formatRub(state.bloggers.price)})`
-            );
-            breakdownEl.innerHTML = parts.join(' + ');
+        if (tg){
+          try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+        }
+        calculateTotal();
+      });
+    });
+
+    // Блогеры (radio — но с возможностью снять выбор)
+    document.querySelectorAll('[data-type="blogger"]').forEach(option=>{
+      option.addEventListener('click', ()=>{
+        const already = option.classList.contains('selected');
+
+        document.querySelectorAll('[data-type="blogger"]').forEach(o=>o.classList.remove('selected'));
+
+        if (already){
+          selected.blogger = null;
+        } else {
+          option.classList.add('selected');
+          const name = option.querySelector('.option-text').textContent.trim();
+          const price = parseInt(option.dataset.price,10);
+          selected.blogger = {name,price};
         }
 
-        return total;
+        if (tg){
+          try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+        }
+        calculateTotal();
+      });
+    });
+
+    // MainButton — отправка данных продюсеру
+    if (tg){
+      tg.MainButton.onClick(()=>{
+        try { tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('success'); } catch(e){}
+
+        const payload = {
+          type: 'budget_calc',
+          package: selected.package ? selected.package.name : null,
+          packagePrice: selected.package ? selected.package.price : 0,
+          production: selected.production.map(p=>p.name),
+          productionPrice: selected.production.reduce((sum,p)=>sum+p.price,0),
+          blogger: selected.blogger ? selected.blogger.name : null,
+          bloggerPrice: selected.blogger ? selected.blogger.price : 0,
+          total: calculateTotal(),
+          userId: tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null
+        };
+
+        tg.sendData(JSON.stringify(payload));
+        tg.close();
+      });
     }
-
-    // Цель кампании (пиллы)
-    const goalPills = document.querySelectorAll('#goalPills .pill');
-    goalPills.forEach(pill => {
-        pill.addEventListener('click', () => {
-            goalPills.forEach(p => p.classList.remove('selected'));
-            pill.classList.add('selected');
-            state.goal = pill.getAttribute('data-value') || state.goal;
-        });
-    });
-
-    // Масштаб кампании
-    const intensityCards = document.querySelectorAll('#intensityGrid .choice-card');
-    intensityCards.forEach(card => {
-        card.addEventListener('click', () => {
-            intensityCards.forEach(c => c.classList.remove('selected'));
-            card.classList.add('selected');
-
-            const id = card.getAttribute('data-id');
-            const price = parseInt(card.getAttribute('data-price') || '0', 10);
-            const nameEl = card.querySelector('.choice-name');
-
-            state.intensity = {
-                id: id,
-                name: nameEl ? nameEl.textContent.trim() : 'Кампания',
-                price: price
-            };
-
-            tg.HapticFeedback && tg.HapticFeedback.impactOccurred && tg.HapticFeedback.impactOccurred('light');
-            updateTotal();
-        });
-    });
-
-    // Материалы / продакшн
-    const prodExtras = document.querySelectorAll('#productionExtras .extra');
-    prodExtras.forEach(extra => {
-        extra.addEventListener('click', () => {
-            prodExtras.forEach(e => e.classList.remove('selected'));
-            extra.classList.add('selected');
-
-            const id = extra.getAttribute('data-id');
-            const price = parseInt(extra.getAttribute('data-price') || '0', 10);
-            const titleEl = extra.querySelector('.extra-title');
-
-            const checkbox = extra.querySelector('.checkbox');
-            prodExtras.forEach(e => {
-                const cb = e.querySelector('.checkbox');
-                if (cb) cb.textContent = '';
-            });
-            if (checkbox) checkbox.textContent = '✓';
-
-            state.production = {
-                id: id,
-                name: titleEl ? titleEl.textContent.trim() : 'Продакшн',
-                price: price
-            };
-
-            tg.HapticFeedback && tg.HapticFeedback.impactOccurred && tg.HapticFeedback.impactOccurred('light');
-            updateTotal();
-        });
-    });
-
-    // Блогеры
-    const blogExtras = document.querySelectorAll('#bloggerExtras .extra');
-    blogExtras.forEach(extra => {
-        extra.addEventListener('click', () => {
-            blogExtras.forEach(e => e.classList.remove('selected'));
-            extra.classList.add('selected');
-
-            const id = extra.getAttribute('data-id');
-            const price = parseInt(extra.getAttribute('data-price') || '0', 10);
-            const titleEl = extra.querySelector('.extra-title');
-
-            const checkbox = extra.querySelector('.checkbox');
-            blogExtras.forEach(e => {
-                const cb = e.querySelector('.checkbox');
-                if (cb) cb.textContent = '';
-            });
-            if (checkbox) checkbox.textContent = '✓';
-
-            state.bloggers = {
-                id: id,
-                name: titleEl ? titleEl.textContent.trim() : 'Блогеры',
-                price: price
-            };
-
-            tg.HapticFeedback && tg.HapticFeedback.impactOccurred && tg.HapticFeedback.impactOccurred('light');
-            updateTotal();
-        });
-    });
-
-    // Кнопка Telegram
-    if (tg.MainButton && tg.MainButton.onClick) {
-        tg.MainButton.onClick(() => {
-            tg.HapticFeedback && tg.HapticFeedback.notificationOccurred && tg.HapticFeedback.notificationOccurred('success');
-
-            const payload = {
-                goal: state.goal,
-                intensity: state.intensity,
-                production: state.production,
-                bloggers: state.bloggers,
-                total: updateTotal(),
-                userId: tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null
-            };
-
-            tg.sendData && tg.sendData(JSON.stringify(payload));
-            tg.close && tg.close();
-        });
-    }
-
-    // Инициализация суммы
-    updateTotal();
-</script>
+  </script>
 </body>
 </html>
