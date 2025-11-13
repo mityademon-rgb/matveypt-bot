@@ -994,26 +994,40 @@
     });
 
     // MainButton — отправка данных продюсеру
-    if (tg){
-      tg.MainButton.onClick(()=>{
-        try { tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('success'); } catch(e){}
+if (tg){
+  tg.MainButton.onClick(()=>{
+    console.log('🔥 MainButton нажата!');
+    
+    try { 
+      tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('success'); 
+    } catch(e){}
 
-        const payload = {
-          type: 'budget_calc',
-          package: selected.package ? selected.package.name : null,
-          packagePrice: selected.package ? selected.package.price : 0,
-          production: selected.production.map(p=>p.name),
-          productionPrice: selected.production.reduce((sum,p)=>sum+p.price,0),
-          blogger: selected.blogger ? selected.blogger.name : null,
-          bloggerPrice: selected.blogger ? selected.blogger.price : 0,
-          total: calculateTotal(),
-          userId: tg.initDataUnsafe && tg.initDataUnsafe.user ? tg.initDataUnsafe.user.id : null
-        };
+    const payload = {
+      type: 'budget_calc',
+      package: selected.package ? selected.package.name : null,
+      packagePrice: selected.package ? selected.package.price : 0,
+      production: selected.production.map(p=>p.name),
+      productionPrice: selected.production.reduce((sum,p)=>sum+p.price,0),
+      blogger: selected.blogger ? selected.blogger.name : null,
+      bloggerPrice: selected.blogger ? selected.blogger.price : 0,
+      total: calculateTotal()
+    };
 
-        tg.sendData(JSON.stringify(payload));
-        tg.close();
-      });
-    }
+    console.log('📦 Payload:', JSON.stringify(payload));
+    
+    // ОТПРАВЛЯЕМ ДАННЫЕ
+    tg.sendData(JSON.stringify(payload));
+    
+    console.log('✅ Данные отправлены!');
+    
+    // ЗАКРЫВАЕМ С ЗАДЕРЖКОЙ (даём время отправить)
+    setTimeout(() => {
+      console.log('🚪 Закрываем WebApp');
+      tg.close();
+    }, 300);
+  });
+}
+
   </script>
 </body>
 </html>
