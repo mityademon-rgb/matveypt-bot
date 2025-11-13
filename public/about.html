@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#f37021" />
   
+  <!-- PWA / iOS -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   
@@ -17,285 +18,760 @@
     :root{
       --brand:#f37021;
       --brand2:#ff8a3c;
-      --bg:#f7f3fb;
-      --text:#2b2431;
-      --text-light:#756575;
-      --card-bg:#ffffff;
-      --border:#e3e0ee;
+      --brand-soft:#ffe2cf;
+      --bg1:#0b0c10;
+      --bg2:#191925;
+      --card:#1f202c;
+      --card-soft:#252637;
+      --text:#f5f5ff;
+      --muted:#a9a8c0;
+      --border:#343549;
+      --chip:#2c2d40;
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
-    
+
     body{
       font-family:'Montserrat',sans-serif;
-      background:linear-gradient(180deg,#f7f3fb,#f1f5ff);
+      background:radial-gradient(circle at top,#26243a 0,#0b0c10 48%,#050509 100%);
       color:var(--text);
       -webkit-font-smoothing:antialiased;
       padding-bottom:80px;
     }
 
     .page{
-      max-width:680px;
+      max-width:720px;
       margin:0 auto;
-      padding:16px;
+      padding:16px 16px 96px;
     }
 
+    /* ===== HERO ===== */
     .hero{
-      background:linear-gradient(135deg,var(--brand),var(--brand2));
-      border-radius:24px;
-      padding:24px 20px;
-      color:#fff;
-      text-align:center;
-      margin-bottom:20px;
-      box-shadow:0 12px 32px rgba(243,112,33,.35);
+      position:relative;
+      border-radius:26px;
+      padding:22px 18px 20px;
+      background:
+        radial-gradient(circle at 8% -10%,rgba(255,255,255,.16),transparent 55%),
+        linear-gradient(135deg,#1d1f31,#121320);
+      overflow:hidden;
+      box-shadow:0 16px 40px rgba(0,0,0,.65);
+      margin-bottom:18px;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      background:
+        radial-gradient(circle at 0 0,rgba(255,255,255,.08) 0,transparent 40%),
+        radial-gradient(circle at 110% 10%,rgba(255,107,39,.45) 0,transparent 58%);
+      opacity:.8;
+      z-index:0;
+      animation:heroGlow 12s ease-in-out infinite alternate;
+    }
+    @keyframes heroGlow{
+      from{transform:translate3d(0,0,0) scale(1);}
+      to{transform:translate3d(-12px,8px,0) scale(1.03);}
     }
 
+    .hero-inner{
+      position:relative;
+      z-index:1;
+      display:flex;
+      gap:14px;
+      align-items:flex-start;
+    }
     .hero-logo{
-      width:64px;
-      height:64px;
-      background:#fff;
-      border-radius:50%;
+      flex-shrink:0;
+      width:60px;
+      height:60px;
+      border-radius:999px;
+      background:radial-gradient(circle at 30% 0,#ffffff,#ffd7be);
       display:flex;
       align-items:center;
       justify-content:center;
-      margin:0 auto 12px;
-      font-weight:900;
-      font-size:28px;
       color:var(--brand);
+      font-weight:900;
+      font-size:26px;
+      box-shadow:0 10px 24px rgba(0,0,0,.45);
+    }
+    .hero-main{
+      flex:1;
+      min-width:0;
+    }
+    .hero-kicker{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:3px 10px 4px;
+      border-radius:999px;
+      background:rgba(0,0,0,.45);
+      backdrop-filter:blur(10px);
+      font-size:10px;
+      font-weight:800;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      color:#fbeaea;
+      margin-bottom:8px;
+    }
+    .hero-dot{
+      width:7px;
+      height:7px;
+      border-radius:999px;
+      background:radial-gradient(circle,#ffea00,#ff3b1f);
+      box-shadow:0 0 0 6px rgba(255,94,42,.25);
+      animation:dotPulse 1.8s ease-out infinite;
+    }
+    @keyframes dotPulse{
+      0%{transform:scale(.9);opacity:.9}
+      60%{transform:scale(1.15);opacity:1}
+      100%{transform:scale(.9);opacity:.9}
     }
 
     .hero-title{
-      font-size:24px;
+      font-size:22px;
       font-weight:900;
-      margin-bottom:8px;
       line-height:1.2;
+      margin-bottom:4px;
     }
-
     .hero-subtitle{
-      font-size:14px;
-      opacity:.95;
+      font-size:13px;
+      color:var(--muted);
       font-weight:600;
     }
 
-    .section{
-      background:var(--card-bg);
-      border-radius:20px;
-      padding:20px;
-      margin-bottom:16px;
-      border:1px solid var(--border);
-      box-shadow:0 8px 20px rgba(0,0,0,.04);
+    .hero-meta-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-top:14px;
+    }
+    .hero-chip{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      background:rgba(0,0,0,.32);
+      border:1px solid rgba(255,255,255,.12);
+      font-size:11px;
+      font-weight:600;
+      color:#f7f3fb;
+      white-space:nowrap;
+    }
+    .hero-chip span{
+      opacity:.8;
     }
 
-    .section-title{
-      font-size:18px;
+    .hero-tagline{
+      margin-top:12px;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    /* mini navigation chips */
+    .nav-chips{
+      margin:18px 0 6px;
+      display:flex;
+      gap:8px;
+      overflow-x:auto;
+      padding-bottom:4px;
+      scrollbar-width:none;
+    }
+    .nav-chips::-webkit-scrollbar{display:none}
+    .nav-chip{
+      flex-shrink:0;
+      padding:7px 12px 8px;
+      border-radius:999px;
+      background:var(--chip);
+      border:1px solid rgba(255,255,255,.08);
+      font-size:11px;
+      font-weight:700;
+      color:var(--muted);
+      cursor:pointer;
+      transition:all .18s ease;
+      white-space:nowrap;
+    }
+    .nav-chip.active{
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      color:#120b0a;
+      border-color:rgba(0,0,0,.0);
+      box-shadow:0 8px 20px rgba(243,112,33,.4);
+    }
+
+    /* ===== карточки-секции ===== */
+    .section{
+      background:linear-gradient(145deg,#1b1c29,#151623);
+      border-radius:22px;
+      padding:18px 16px 16px;
+      margin-top:10px;
+      border:1px solid var(--border);
+      box-shadow:0 16px 36px rgba(0,0,0,.45);
+      position:relative;
+      overflow:hidden;
+    }
+    .section::before{
+      content:"";
+      position:absolute;
+      inset:-40%;
+      opacity:.16;
+      background:
+        radial-gradient(circle at 0 0,#ffb88a,transparent 50%),
+        radial-gradient(circle at 100% 100%,#7f7fff,transparent 55%);
+      mix-blend-mode:screen;
+      pointer-events:none;
+    }
+    .section-inner{
+      position:relative;
+      z-index:1;
+    }
+
+    .section-label{
+      font-size:11px;
       font-weight:800;
-      margin-bottom:12px;
-      color:var(--text);
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:var(--muted);
+      margin-bottom:4px;
+    }
+    .section-title{
+      font-size:17px;
+      font-weight:900;
+      margin-bottom:10px;
+      color:#ffffff;
     }
 
     .section-text{
-      font-size:14px;
-      line-height:1.65;
-      color:var(--text-light);
-      margin-bottom:12px;
+      font-size:13px;
+      line-height:1.7;
+      color:var(--muted);
+      margin-bottom:8px;
     }
 
+    /* ===== карточка с картинкой ===== */
+    .media-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:10px;
+    }
+    .media-card{
+      position:relative;
+      flex:1 1 180px;
+      border-radius:18px;
+      overflow:hidden;
+      background:#111320;
+      min-height:150px;
+      box-shadow:0 10px 26px rgba(0,0,0,.6);
+    }
+    .media-card img{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      transform:scale(1.06);
+      filter:saturate(1.1) contrast(1.05);
+      transition:transform .8s ease;
+    }
+    .media-card:hover img{
+      transform:scale(1.12);
+    }
+    .media-card-gradient{
+      position:absolute;
+      inset:0;
+      background:linear-gradient(160deg,rgba(0,0,0,.05),rgba(0,0,0,.84));
+    }
+    .media-card-body{
+      position:relative;
+      z-index:1;
+      padding:13px 12px;
+      height:100%;
+      display:flex;
+      flex-direction:column;
+      justify-content:flex-end;
+    }
+    .media-tag{
+      font-size:10px;
+      font-weight:800;
+      text-transform:uppercase;
+      letter-spacing:.12em;
+      color:var(--brand-soft);
+      margin-bottom:4px;
+    }
+    .media-title{
+      font-size:13px;
+      font-weight:800;
+      color:#ffffff;
+      margin-bottom:3px;
+    }
+    .media-sub{
+      font-size:11px;
+      color:rgba(239,239,255,.86);
+    }
+
+    /* ===== статистика ===== */
     .stat-grid{
       display:grid;
       grid-template-columns:repeat(2,1fr);
-      gap:12px;
-      margin-top:16px;
+      gap:10px;
+      margin-top:8px;
     }
-
     .stat-card{
-      background:linear-gradient(135deg,#fff5f0,#fff);
-      border-radius:14px;
-      padding:14px;
-      text-align:center;
-      border:1px solid #ffe8df;
+      border-radius:16px;
+      padding:12px 11px 11px;
+      background:radial-gradient(circle at 0 0,rgba(255,255,255,.16),transparent 55%),#191a27;
+      border:1px solid #3a3b52;
+      position:relative;
+      overflow:hidden;
     }
-
+    .stat-card::after{
+      content:"";
+      position:absolute;
+      right:-18px;
+      top:-18px;
+      width:40px;
+      height:40px;
+      border-radius:999px;
+      background:radial-gradient(circle,rgba(255,255,255,.28),transparent 60%);
+      opacity:.7;
+    }
     .stat-number{
-      font-size:24px;
+      font-size:20px;
       font-weight:900;
-      color:var(--brand);
-      margin-bottom:4px;
+      color:#fff;
+      margin-bottom:2px;
     }
-
     .stat-label{
-      font-size:11px;
+      font-size:10px;
       text-transform:uppercase;
-      letter-spacing:.05em;
-      color:var(--text-light);
+      letter-spacing:.08em;
+      color:var(--muted);
       font-weight:700;
     }
+    .stat-note{
+      margin-top:10px;
+      font-size:10px;
+      color:#6c6c82;
+    }
 
-    .features-list{
+    /* ===== списки ===== */
+    .feature-list{
       list-style:none;
+      margin:10px 0 0;
       padding:0;
-      margin:12px 0 0;
     }
-
-    .features-list li{
-      padding:10px 0 10px 28px;
+    .feature-item{
       position:relative;
-      font-size:14px;
-      line-height:1.5;
-      color:var(--text-light);
+      padding-left:22px;
+      margin-bottom:7px;
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.55;
     }
-
-    .features-list li:before{
-      content:'✓';
+    .feature-item strong{
+      color:#fff;
+      font-weight:600;
+    }
+    .feature-item::before{
+      content:'';
       position:absolute;
       left:0;
-      top:10px;
-      color:#16a34a;
-      font-weight:800;
-      font-size:16px;
-    }
-
-    .badge{
-      display:inline-block;
-      background:#fff5f0;
-      color:var(--brand);
-      padding:6px 12px;
+      top:6px;
+      width:12px;
+      height:12px;
       border-radius:999px;
-      font-size:11px;
-      font-weight:800;
-      text-transform:uppercase;
-      letter-spacing:.05em;
-      margin:4px 4px 4px 0;
+      background:radial-gradient(circle,#16a34a,#0f5132);
+      box-shadow:0 0 0 4px rgba(34,197,94,.26);
     }
 
+    .badge-row{
+      display:flex;
+      flex-wrap:wrap;
+      gap:6px;
+      margin-top:10px;
+    }
+    .badge{
+      font-size:10px;
+      padding:5px 9px 6px;
+      border-radius:999px;
+      background:rgba(255,255,255,.05);
+      border:1px solid rgba(255,255,255,.14);
+      color:var(--muted);
+      font-weight:700;
+      text-transform:uppercase;
+      letter-spacing:.08em;
+    }
+    .badge--accent{
+      background:rgba(243,112,33,.15);
+      border-color:rgba(243,112,33,.55);
+      color:#ffd6bf;
+    }
+
+    /* ===== контент-диаграмма ===== */
+    .mix-row{
+      margin-top:10px;
+    }
+    .mix-bars{
+      display:flex;
+      overflow:hidden;
+      border-radius:999px;
+      height:14px;
+      margin-bottom:8px;
+      border:1px solid #3c3d58;
+    }
+    .mix-seg{
+      height:100%;
+    }
+    .mix-a{flex:0 0 15%;background:linear-gradient(90deg,#ffb678,#ff8a3c);}
+    .mix-b{flex:0 0 45%;background:linear-gradient(90deg,#ff8a3c,#f37021);}
+    .mix-c{flex:1;background:linear-gradient(90deg,#f37021,#e457ff);}
+    .mix-legend{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      font-size:11px;
+      color:var(--muted);
+    }
+    .mix-dot{
+      width:8px;
+      height:8px;
+      border-radius:999px;
+      margin-right:4px;
+      display:inline-block;
+    }
+
+    /* ссылки */
+    a.link{
+      color:var(--brand);
+      text-decoration:none;
+      font-weight:600;
+    }
+
+    /* footer button */
     .footer-btn{
       position:fixed;
       bottom:0;
       left:0;
       right:0;
-      padding:12px 16px 16px;
-      background:rgba(255,255,255,.96);
-      backdrop-filter:blur(12px);
-      border-top:1px solid var(--border);
+      padding:10px 16px 16px;
+      background:rgba(6,7,12,.96);
+      backdrop-filter:blur(16px);
+      border-top:1px solid #262739;
+      z-index:20;
     }
-
     .footer-btn button{
       width:100%;
-      max-width:680px;
+      max-width:720px;
       margin:0 auto;
       display:block;
       background:linear-gradient(135deg,var(--brand),var(--brand2));
-      color:#fff;
+      color:#120b0a;
       border:none;
       border-radius:999px;
-      padding:14px;
-      font-size:15px;
-      font-weight:800;
+      padding:13px 14px;
+      font-size:14px;
+      font-weight:900;
       cursor:pointer;
-      box-shadow:0 8px 20px rgba(243,112,33,.35);
+      box-shadow:0 10px 24px rgba(243,112,33,.55);
+    }
+
+    /* reveal animation */
+    .reveal{
+      opacity:0;
+      transform:translate3d(0,18px,0);
+      transition:opacity .4s ease-out,transform .4s ease-out;
+    }
+    .reveal.visible{
+      opacity:1;
+      transform:translate3d(0,0,0);
     }
 
     @media(max-width:640px){
-      .stat-grid{grid-template-columns:1fr}
+      .hero-inner{align-items:flex-start}
+      .stat-grid{grid-template-columns:1fr 1fr}
+      .media-row{flex-direction:column}
+      .page{padding-bottom:96px}
     }
   </style>
 </head>
 <body>
   <div class="page">
-    
-    <div class="hero">
-      <div class="hero-logo">TV</div>
-      <div class="hero-title">Первый туристический</div>
-      <div class="hero-subtitle">Федеральный телеканал о путешествиях</div>
-    </div>
+    <!-- HERO -->
+    <header class="hero reveal" data-delay="0">
+      <div class="hero-inner">
+        <div class="hero-logo">TV</div>
+        <div class="hero-main">
+          <div class="hero-kicker">
+            <span class="hero-dot"></span>
+            <span>Первый туристический • 12+</span>
+          </div>
+          <div class="hero-title">Федеральный телеканал о&nbsp;путешествиях</div>
+          <div class="hero-subtitle">
+            Живая медиаплатформа: эфир, отели, IPTV, соцсети и партнёры — в одной экосистеме.
+          </div>
 
-    <div class="section">
-      <div class="section-title">📺 О канале</div>
-      <div class="section-text">
-        «Первый туристический телеканал» — это уникальный проект, который предлагает своим зрителям обзоры лучших мест для отдыха и путешествий по всему миру.
-      </div>
-      <div class="section-text">
-        Мы рассказываем о самых интересных и необычных местах, где можно хорошо провести время и насладиться красотами природы. Наши ведущие — опытные путешественники и тревел-блогеры.
-      </div>
-      <div class="section-text">
-        Телеканал работает круглосуточно и транслирует передачи о различных странах и городах, помогая зрителям выбрать идеальное место для отдыха.
-      </div>
-    </div>
+          <div class="hero-meta-row">
+            <div class="hero-chip">
+              📊 <span>1 200 000+ зрителей в месяц</span>
+            </div>
+            <div class="hero-chip">
+              ⏱ <span>Среднее время просмотра 40–70 минут</span>
+            </div>
+            <div class="hero-chip">
+              🌍 <span>Россия, Турция, скоро ОАЭ и Египет</span>
+            </div>
+          </div>
 
-    <div class="section">
-      <div class="section-title">🎯 Наша аудитория</div>
-      
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-number">1,2 млн</div>
-          <div class="stat-label">Зрителей в месяц</div>
+          <div class="hero-tagline">
+            Мы показываем путешествия глазами тех, кто действительно ездит: блогеры, эксперты, гости отелей. 
+            Без скучных студийных монологов — только живые истории и полезные советы.
+          </div>
         </div>
-        <div class="stat-card">
-          <div class="stat-number">25-55</div>
-          <div class="stat-label">Возраст ЦА</div>
+      </div>
+    </header>
+
+    <!-- mini nav -->
+    <nav class="nav-chips">
+      <button class="nav-chip active" data-target="about">О канале</button>
+      <button class="nav-chip" data-target="audience">Аудитория</button>
+      <button class="nav-chip" data-target="where">Где нас смотрят</button>
+      <button class="nav-chip" data-target="content">Контент</button>
+      <button class="nav-chip" data-target="social">Соцсети</button>
+      <button class="nav-chip" data-target="license">Регистрация</button>
+    </nav>
+
+    <!-- О КАНАЛЕ -->
+    <section class="section reveal" id="about" data-delay="40">
+      <div class="section-inner">
+        <div class="section-label">О канале</div>
+        <h2 class="section-title">Канал, где отпуск не выключается</h2>
+        <p class="section-text">
+          «Первый туристический телеканал» — медиаплатформа о путешествиях, отдыхе и 
+          туризме, которая работает 24/7. Мы делаем обзоры направлений, городов и отелей, 
+          показываем реальные маршруты и помогаем зрителям выбрать идеальное место 
+          для отпуска — от соседней области до другой страны.
+        </p>
+        <p class="section-text">
+          В фокусе — и путешествия по миру, и туризм внутри России. Наша задача — 
+          вдохновить на поездку и одновременно дать практику: где жить, что смотреть, 
+          на чём экономить, а на чём экономить точно не стоит.
+        </p>
+
+        <div class="media-row">
+          <div class="media-card">
+            <img src="https://1tourtv.ru/wp-content/uploads/2025/09/photo_2025-09-27_11-55-56.jpg" alt="Путешественница" loading="lazy">
+            <div class="media-card-gradient"></div>
+            <div class="media-card-body">
+              <div class="media-tag">Живые истории</div>
+              <div class="media-title">Путешествия глазами зрителей и блогеров</div>
+              <div class="media-sub">Не постановочные сюжеты, а настоящий опыт людей, которые уже побывали «там».</div>
+            </div>
+          </div>
+          <div class="media-card">
+            <img src="https://1tourtv.ru/wp-content/uploads/2025/09/photo_2025-07-22_12-34-16-1.jpg" alt="Студия Первого туристического" loading="lazy">
+            <div class="media-card-gradient"></div>
+            <div class="media-card-body">
+              <div class="media-tag">Студия</div>
+              <div class="media-title">Известные люди, эксперты, туриндустрия</div>
+              <div class="media-sub">Ток-шоу, обсуждения трендов и честные разговоры о туризме без пафоса.</div>
+            </div>
+          </div>
         </div>
       </div>
+    </section>
 
-      <div class="section-text" style="margin-top:16px">
-        Наша целевая аудитория — активная платежеспособная категория людей в возрасте от 25 до 55 лет, которые заинтересованы в получении новых знаний и впечатлений.
+    <!-- АУДИТОРИЯ -->
+    <section class="section reveal" id="audience" data-delay="80">
+      <div class="section-inner">
+        <div class="section-label">Аудитория</div>
+        <h2 class="section-title">Активные путешественники с деньгами и планами</h2>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-number" data-stat="audience">1 200 000+</div>
+            <div class="stat-label">Зрителей в месяц</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">25–55</div>
+            <div class="stat-label">Возраст ядра ЦА</div>
+          </div>
+        </div>
+
+        <p class="section-text" style="margin-top:10px">
+          Наша основная аудитория — люди 25–55 лет: семейные пары, частые путешественники, 
+          владельцы и топ-менеджеры бизнеса, сотрудники крупных компаний. Они планируют 
+          отпуска заранее, сравнивают варианты и ценят честный опыт.
+        </p>
+
+        <ul class="feature-list">
+          <li class="feature-item">
+            <strong>Платежеспособная ЦА.</strong> Зрители, которые действительно покупают туры, 
+            бронируют отели и летают несколько раз в год.
+          </li>
+          <li class="feature-item">
+            <strong>Решения «здесь и сейчас».</strong> Канал смотрят, когда уже задумываются об отдыхе 
+            или выбирают, куда поехать дальше.
+          </li>
+          <li class="feature-item">
+            <strong>Доверие к экспертам.</strong> Блогеры, ведущие и гости делятся личным опытом, 
+            а не читают рекламные слоганы.
+          </li>
+        </ul>
       </div>
-    </div>
+    </section>
 
-    <div class="section">
-      <div class="section-title">🌍 Где нас смотрят</div>
-      
-      <ul class="features-list">
-        <li><strong>IP-провайдеры и видеосервисы</strong> — Wink, МТС, Билайн и другие</li>
-        <li><strong>Кабельные сети</strong> — трансляция в крупных городах РФ</li>
-        <li><strong>Сетевые отели</strong> — Rixos, Barut, Kempinski (Россия и Турция)</li>
-        <li><strong>Онлайн</strong> — прямой эфир на сайте и в соцсетях</li>
-      </ul>
+    <!-- ГДЕ НАС СМОТРЯТ -->
+    <section class="section reveal" id="where" data-delay="120">
+      <div class="section-inner">
+        <div class="section-label">Покрытие</div>
+        <h2 class="section-title">Эфир, отели, IPTV, соцсети и партнёры</h2>
 
-      <div style="margin-top:12px">
-        <span class="badge">РФ</span>
-        <span class="badge">Турция</span>
-        <span class="badge">Скоро: ОАЭ и Египет</span>
+        <p class="section-text">
+          Мы «приводим» путешествия туда, где людям удобно смотреть: дома на большом экране, 
+          в номере отеля, в дороге — через приложения и онлайн.
+        </p>
+
+        <ul class="feature-list">
+          <li class="feature-item">
+            <strong>IP-провайдеры и видеосервисы.</strong> Трансляция в пакетах крупных провайдеров, 
+            просмотр через приложения вроде Wink.
+          </li>
+          <li class="feature-item">
+            <strong>Кабельные сети.</strong> Вещание в сетях операторов крупных городов России.
+          </li>
+          <li class="feature-item">
+            <strong>Сетевые отели.</strong> Россия и Турция, включая Rixos, Barut, Kempinski — 
+            канал включён прямо в номер.
+          </li>
+          <li class="feature-item">
+            <strong>Онлайн-эфир.</strong> Прямые трансляции на сайте и в соцсетях — зритель 
+            может включить нас из любой точки мира.
+          </li>
+        </ul>
+
+        <div class="badge-row">
+          <span class="badge badge--accent">Россия</span>
+          <span class="badge badge--accent">Турция</span>
+          <span class="badge">Скоро: ОАЭ</span>
+          <span class="badge">Скоро: Египет</span>
+        </div>
+
+        <div class="media-row" style="margin-top:12px">
+          <div class="media-card">
+            <img src="https://1tourtv.ru/wp-content/uploads/2025/09/photo_2025-09-06_11-44-43.jpg" alt="Зрители и пирамиды" loading="lazy">
+            <div class="media-card-gradient"></div>
+            <div class="media-card-body">
+              <div class="media-tag">Доставка в номер</div>
+              <div class="media-title">Гости смотрят нас на курортах</div>
+              <div class="media-sub">Туристы узнают о новых маршрутах прямо во время отдыха — в отелях России и Турции.</div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
 
-    <div class="section">
-      <div class="section-title">🎬 Наш контент</div>
-      
-      <div class="section-text"><strong>40%</strong> — Токшоу и известные люди в студии</div>
-      <div class="section-text"><strong>45%</strong> — Блогеры и истории от первого лица</div>
-      <div class="section-text"><strong>15%</strong> — Полезный контент 24/7</div>
+    <!-- КОНТЕНТ -->
+    <section class="section reveal" id="content" data-delay="160">
+      <div class="section-inner">
+        <div class="section-label">Контент</div>
+        <h2 class="section-title">Ток-шоу, блогеры и польза 24/7</h2>
 
-      <ul class="features-list" style="margin-top:16px">
-        <li>Собственные программы с топовыми блогерами</li>
-        <li>Языковой барьер: разговорник для путешественников</li>
-        <li>Туристические лайфхаки от бывалых</li>
-        <li>Новости туризма без воды и рекламы</li>
-      </ul>
-    </div>
+        <div class="mix-row">
+          <div class="mix-bars">
+            <div class="mix-seg mix-a"></div>
+            <div class="mix-seg mix-b"></div>
+            <div class="mix-seg mix-c"></div>
+          </div>
+          <div class="mix-legend">
+            <span><span class="mix-dot" style="background:#ffb678"></span>15% — ток-шоу с известными людьми</span>
+            <span><span class="mix-dot" style="background:#ff8a3c"></span>45% — блогеры, истории от первого лица</span>
+            <span><span class="mix-dot" style="background:#f37021"></span>40% — полезный контент и лайфхаки</span>
+          </div>
+        </div>
 
-    <div class="section">
-      <div class="section-title">📱 Соцсети и трансляции</div>
-      <div class="section-text">
-        Мы есть во всех популярных соцсетях: Telegram, ВКонтакте, Одноклассники, RuTube, YouTube.
-      </div>
-      <div class="section-text">
-        Прямые трансляции в ВК и ОК. Лучшие программы на видеосервисах.
-      </div>
-      <div class="section-text" style="margin-top:12px">
-        <strong>📺 Смотреть прямой эфир:</strong><br>
-        <a href="http://1tourtv.ru" style="color:var(--brand);font-weight:700">1tourtv.ru</a>
-      </div>
-    </div>
+        <p class="section-text" style="margin-top:10px">
+          Эфир строится так, чтобы зритель мог включить нас в любой момент и всё равно 
+          попасть в «живой» контент: либо в беседу со студийными гостями, либо в блогерский 
+          маршрут, либо в рубрику с конкретными советами.
+        </p>
 
-    <div class="section">
-      <div class="section-title">📄 Регистрация</div>
-      <div class="section-text" style="font-size:12px">
-        Зарегистрировано Федеральной службой по надзору в сфере связи, информационных технологий и массовых коммуникаций.<br><br>
-        <strong>Регистрационный номер:</strong> серия Эл № ФС77-85763 от 14 августа 2023 г.
+        <ul class="feature-list">
+          <li class="feature-item">
+            <strong>Собственные программы.</strong> Форматы под разные задачи: обзорные, 
+            тематические, студийные, выездные.
+          </li>
+          <li class="feature-item">
+            <strong>Блогеры.</strong> Топовые тревел-авторы рассказывают о своих поездках 
+            в своём стиле — вы видите маршрут чужими глазами, как будто сами поехали.
+          </li>
+          <li class="feature-item">
+            <strong>Языковой барьер.</strong> Рубрики-разговорники и полезные фразы для 
+            путешественников — их легко запомнить и реально использовать.
+          </li>
+          <li class="feature-item">
+            <strong>Туристические лайфхаки.</strong> Что взять с собой, как не переплатить, 
+            на чём сэкономить, а где экономить опасно.
+          </li>
+          <li class="feature-item">
+            <strong>Новости туризма.</strong> Совместно с «Общественной службой новостей» 
+            берём только важное и даём объективную картину без лишнего шума.
+          </li>
+        </ul>
       </div>
-    </div>
+    </section>
+
+    <!-- СОЦСЕТИ -->
+    <section class="section reveal" id="social" data-delay="200">
+      <div class="section-inner">
+        <div class="section-label">Онлайн-экосистема</div>
+        <h2 class="section-title">Соцсети, прямые эфиры и умный бот</h2>
+
+        <p class="section-text">
+          «Первый туристический» присутствует во всех ключевых соцсетях: Telegram, ВКонтакте, 
+          Одноклассники, RuTube, YouTube. Канал в Telegram — самостоятельный информационный 
+          ресурс с новостями и анонсами эфира.
+        </p>
+
+        <p class="section-text">
+          Прямой эфир запущен в Одноклассниках и ВКонтакте, лучшие программы выкладываются 
+          на RuTube и дублируются в YouTube — чтобы зритель мог досмотреть выпуск в удобное время.
+        </p>
+
+        <p class="section-text">
+          Мы также завели умного бота, который помогает разобраться в медиаплатформе и 
+          рекламных возможностях — он действительно многому научился и продолжает обучаться.
+        </p>
+
+        <p class="section-text" style="margin-top:10px">
+          <strong>📺 Прямой эфир:</strong> 
+          <a class="link" href="http://1tourtv.ru" target="_blank" rel="noopener">1tourtv.ru</a>
+        </p>
+      </div>
+    </section>
+
+    <!-- РЕГИСТРАЦИЯ -->
+    <section class="section reveal" id="license" data-delay="240">
+      <div class="section-inner">
+        <div class="section-label">Юридический статус</div>
+        <h2 class="section-title">Зарегистрированное СМИ</h2>
+        <p class="section-text" style="font-size:12px">
+          Зарегистрировано Федеральной службой по надзору в сфере связи, информационных 
+          технологий и массовых коммуникаций.
+        </p>
+        <p class="section-text" style="font-size:12px">
+          <strong>Регистрационный номер:</strong><br>
+          серия Эл № ФС77-85763 от 14 августа 2023 г.
+        </p>
+        <p class="section-text" style="font-size:12px;margin-top:6px">
+          По всем вопросам: <strong>info@1tourtv.ru</strong>
+        </p>
+      </div>
+    </section>
 
   </div>
 
+  <!-- Footer -->
   <div class="footer-btn">
     <button type="button" id="backBtn">⬅ Назад в Telegram</button>
   </div>
@@ -308,14 +784,51 @@
       tg.expand();
     }
 
+    // кнопка назад
     document.getElementById('backBtn').addEventListener('click', ()=>{
-      if (tg) {
-        try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+      if (tg){
+        try{ tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); }catch(e){}
         tg.close();
       } else {
         window.history.back();
       }
     });
+
+    // плавный скролл по чипам
+    const chips = document.querySelectorAll('.nav-chip');
+    chips.forEach(chip=>{
+      chip.addEventListener('click', ()=>{
+        const id = chip.dataset.target;
+        const target = document.getElementById(id);
+        if (!target) return;
+
+        chips.forEach(c=>c.classList.remove('active'));
+        chip.classList.add('active');
+
+        target.scrollIntoView({behavior:'smooth', block:'start'});
+        if (tg){
+          try{ tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); }catch(e){}
+        }
+      });
+    });
+
+    // reveal animation
+    const reveals = document.querySelectorAll('.reveal');
+    const observer = new IntersectionObserver((entries)=>{
+      entries.forEach(entry=>{
+        if (entry.isIntersecting){
+          const el = entry.target;
+          const delay = parseInt(el.dataset.delay || '0',10);
+          setTimeout(()=>{ el.classList.add('visible'); }, delay);
+          observer.unobserve(el);
+        }
+      });
+    },{threshold:0.15});
+
+    reveals.forEach(el=>observer.observe(el));
+
+    // если очень хочется "чуть живой" цифры — можно добавить
+    // лёгкий эффект, но без агрессивной анимации
   </script>
 </body>
 </html>
