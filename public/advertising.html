@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f37021" />
+  
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <title>Рекламные возможности — Первый туристический</title>
+
+  <style>
+    :root{
+      --brand:#f37021;
+      --brand2:#ff8a3c;
+      --bg:#f7f3fb;
+      --text:#2b2431;
+      --text-light:#756575;
+      --card-bg:#ffffff;
+      --border:#e3e0ee;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    
+    body{
+      font-family:'Montserrat',sans-serif;
+      background:linear-gradient(180deg,#f7f3fb,#f1f5ff);
+      color:var(--text);
+      -webkit-font-smoothing:antialiased;
+      padding-bottom:80px;
+    }
+
+    .page{
+      max-width:680px;
+      margin:0 auto;
+      padding:16px;
+    }
+
+    .hero{
+      background:linear-gradient(135deg,#6366f1,#8b5cf6);
+      border-radius:24px;
+      padding:24px 20px;
+      color:#fff;
+      text-align:center;
+      margin-bottom:20px;
+      box-shadow:0 12px 32px rgba(99,102,241,.35);
+    }
+
+    .hero-title{
+      font-size:24px;
+      font-weight:900;
+      margin-bottom:8px;
+      line-height:1.2;
+    }
+
+    .hero-subtitle{
+      font-size:14px;
+      opacity:.95;
+      font-weight:600;
+    }
+
+    .section{
+      background:var(--card-bg);
+      border-radius:20px;
+      padding:20px;
+      margin-bottom:16px;
+      border:1px solid var(--border);
+      box-shadow:0 8px 20px rgba(0,0,0,.04);
+    }
+
+    .section-title{
+      font-size:18px;
+      font-weight:800;
+      margin-bottom:12px;
+      color:var(--text);
+    }
+
+    .section-text{
+      font-size:14px;
+      line-height:1.65;
+      color:var(--text-light);
+      margin-bottom:12px;
+    }
+
+    .format-card{
+      background:linear-gradient(135deg,#fff9f5,#fff);
+      border-radius:14px;
+      padding:16px;
+      margin-bottom:12px;
+      border:1px solid #ffe8df;
+    }
+
+    .format-title{
+      font-size:16px;
+      font-weight:800;
+      color:var(--text);
+      margin-bottom:8px;
+    }
+
+    .format-text{
+      font-size:13px;
+      line-height:1.6;
+      color:var(--text-light);
+    }
+
+    .price-box{
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      color:#fff;
+      border-radius:14px;
+      padding:16px;
+      text-align:center;
+      margin-top:16px;
+    }
+
+    .price-label{
+      font-size:12px;
+      opacity:.9;
+      margin-bottom:4px;
+      font-weight:600;
+    }
+
+    .price-value{
+      font-size:28px;
+      font-weight:900;
+    }
+
+    .footer-btn{
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      padding:12px 16px 16px;
+      background:rgba(255,255,255,.96);
+      backdrop-filter:blur(12px);
+      border-top:1px solid var(--border);
+      display:flex;
+      gap:8px;
+    }
+
+    .footer-btn button{
+      flex:1;
+      background:linear-gradient(135deg,var(--brand),var(--brand2));
+      color:#fff;
+      border:none;
+      border-radius:999px;
+      padding:14px;
+      font-size:14px;
+      font-weight:800;
+      cursor:pointer;
+      box-shadow:0 8px 20px rgba(243,112,33,.35);
+    }
+
+    .footer-btn .btn-secondary{
+      background:#fff;
+      color:var(--text);
+      border:1px solid var(--border);
+      box-shadow:none;
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    
+    <div class="hero">
+      <div class="hero-title">🎯 Рекламные возможности</div>
+      <div class="hero-subtitle">Эффективные форматы для вашего бизнеса</div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">💼 Кому подходит реклама на канале</div>
+      <div class="section-text">
+        <strong>Турагентства и туроператоры</strong> — прямой доступ к целевой аудитории, которая планирует отпуск
+      </div>
+      <div class="section-text">
+        <strong>Отели и курорты</strong> — показ номеров, услуг и акций потенциальным гостям
+      </div>
+      <div class="section-text">
+        <strong>Авиакомпании</strong> — продвижение направлений и спецпредложений
+      </div>
+      <div class="section-text">
+        <strong>Страховые компании</strong> — туристическое страхование для путешественников
+      </div>
+      <div class="section-text">
+        <strong>Производители товаров для туризма</strong> — чемоданы, рюкзаки, одежда, гаджеты
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📺 Форматы размещения</div>
+      
+      <div class="format-card">
+        <div class="format-title">Телевизионные ролики</div>
+        <div class="format-text">
+          Классический формат размещения в эфире канала. Охват аудитории в отелях, IP-сетях и кабельном ТВ.
+        </div>
+      </div>
+
+      <div class="format-card">
+        <div class="format-title">Спонсорство программ</div>
+        <div class="format-text">
+          Ваш бренд как спонсор популярной передачи. Упоминания в начале и конце программы, размещение логотипа.
+        </div>
+      </div>
+
+      <div class="format-card">
+        <div class="format-title">Интеграции с блогерами</div>
+        <div class="format-text">
+          Нативная реклама в программах с топовыми тревел-блогерами. Обзоры, рекомендации, личный опыт.
+        </div>
+      </div>
+
+      <div class="format-card">
+        <div class="format-title">Спецпроекты</div>
+        <div class="format-text">
+          Создание уникальной программы под ваш бренд. Полный творческий контроль и эксклюзивность.
+        </div>
+      </div>
+
+      <div class="format-card">
+        <div class="format-title">Digital-размещение</div>
+        <div class="format-text">
+          Реклама на сайте, в соцсетях и мобильных приложениях канала. Кросс-промо на всех платформах.
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🎬 Производство контента</div>
+      <div class="section-text">
+        Мы поможем создать качественный рекламный ролик или интеграцию:
+      </div>
+      <div class="section-text">
+        • <strong>Концепция и сценарий</strong> — от идеи до финального скрипта<br>
+        • <strong>Съёмка</strong> — профессиональная команда операторов и режиссёров<br>
+        • <strong>Монтаж и постпродакшн</strong> — графика, анимация, цветокоррекция<br>
+        • <strong>Озвучка</strong> — дикторы и голосовые артисты<br>
+        • <strong>Музыка</strong> — лицензированные треки или оригинальная композиция
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📊 Преимущества размещения</div>
+      <div class="section-text">
+        ✓ <strong>Целевая аудитория 24/7</strong> — люди, планирующие путешествия<br>
+        ✓ <strong>Федеральный охват</strong> — вещание по всей России и за рубежом<br>
+        ✓ <strong>Отели и курорты</strong> — ваша реклама прямо в номерах туристов<br>
+        ✓ <strong>Кросс-промо</strong> — ТВ + digital + соцсети<br>
+        ✓ <strong>Доверие аудитории</strong> — канал с госрегистрацией<br>
+        ✓ <strong>Гибкие пакеты</strong> — от недели до годового контракта
+      </div>
+
+      <div class="price-box">
+        <div class="price-label">Минимальный бюджет размещения</div>
+        <div class="price-value">от 450 000 ₽</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">📞 Как начать сотрудничество</div>
+      <div class="section-text">
+        1. <strong>Заполните бриф</strong> — используйте калькулятор бюджета или напишите продюсеру<br>
+        2. <strong>Получите предложение</strong> — мы подберём оптимальный формат и пакет<br>
+        3. <strong>Согласуйте детали</strong> — сроки, креатив, размещение<br>
+        4. <strong>Запускайте кампанию</strong> — мы возьмём всё на себя!
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-btn">
+    <button type="button" id="calcBtn" class="btn-primary">💰 Рассчитать бюджет</button>
+    <button type="button" id="backBtn" class="btn-secondary">⬅ Назад</button>
+  </div>
+
+  <script>
+    const tg = window.Telegram ? window.Telegram.WebApp : null;
+
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    document.getElementById('calcBtn').addEventListener('click', ()=>{
+      if (tg) {
+        try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+        // ОТКРЫВАЕМ КАЛЬКУЛЯТОР
+        window.location.href = '/calculator.html';
+      }
+    });
+
+    document.getElementById('backBtn').addEventListener('click', ()=>{
+      if (tg) {
+        try { tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); } catch(e){}
+        tg.close();
+      } else {
+        window.history.back();
+      }
+    });
+  </script>
+</body>
+</html>
