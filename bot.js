@@ -12,6 +12,17 @@ const app = express();
 
 const sessions = new Map();
 
+// ПОСТОЯННАЯ КЛАВИАТУРА
+const MAIN_KEYBOARD = {
+  keyboard: [
+    [{ text: '📺 О канале' }, { text: '🎯 Рекламные возможности' }],
+    [{ text: '💰 Посчитать бюджет' }],
+    [{ text: '📞 Связаться с менеджером' }]
+  ],
+  resize_keyboard: true,
+  persistent: true
+};
+
 app.use(express.static('public'));
 app.use(express.json());
 
@@ -28,6 +39,7 @@ app.post('/api/calculate', (req, res) => {
   });
   res.json(packages);
 });
+
 // ENDPOINT ДЛЯ ПОЛУЧЕНИЯ ДАННЫХ ИЗ КАЛЬКУЛЯТОРА
 app.post('/api/budget', async (req, res) => {
   console.log('💰 POST /api/budget получен!');
@@ -43,7 +55,6 @@ app.post('/api/budget', async (req, res) => {
       return res.status(500).json({ success: false, error: 'Manager not configured' });
     }
 
-    // ФОРМИРУЕМ СООБЩЕНИЕ МЕНЕДЖЕРУ
     let managerMessage = `🔥 НОВЫЙ РАСЧЁТ ИЗ КАЛЬКУЛЯТОРА!\n\n`;
     
     if (chatId) {
@@ -96,14 +107,12 @@ app.post('/api/budget', async (req, res) => {
       ]
     } : undefined;
 
-    // ОТПРАВЛЯЕМ МЕНЕДЖЕРУ
     await bot.sendMessage(managerChatId, managerMessage, {
       reply_markup: managerKeyboard
     });
 
     console.log(`✅ Уведомление отправлено менеджеру через HTTP POST`);
 
-    // ОТПРАВЛЯЕМ КЛИЕНТУ (если есть chatId)
     if (chatId) {
       let clientMessage = `✅ Ваш расчёт получен!\n\n💰 ИТОГО: ${data.total.toLocaleString('ru-RU')} ₽\n\n`;
 
@@ -125,7 +134,7 @@ app.post('/api/budget', async (req, res) => {
 
       clientMessage += `Наш продюсер скоро свяжется с вами! 😊`;
 
-      await bot.sendMessage(chatId, clientMessage);
+      await bot.sendMessage(chatId, clientMessage, { reply_markup: MAIN_KEYBOARD });
       console.log(`✅ Подтверждение отправлено клиенту`);
     }
 
@@ -156,10 +165,6 @@ async function sendReminderToManager(chatId, brief) {
   }
 }
 
-/**
- * ОБРАБОТКА ДАННЫХ ИЗ WEB APP (КАЛЬКУЛЯТОР)
- * СЮДА ПРИЛЕТАЕТ payload из Telegram.WebApp.sendData(...)
- */
 async function handleWebAppData(msg) {
   const chatId = msg.chat.id;
 
@@ -177,7 +182,6 @@ async function handleWebAppData(msg) {
       phone: null
     };
 
-    // Сообщение клиенту
     let clientMessage = `✅ Ваш расчёт получен!\n\n💰 ИТОГО: ${data.total.toLocaleString('ru-RU')} ₽\n\n`;
 
     if (data.production && data.production.length > 0) {
@@ -198,9 +202,8 @@ async function handleWebAppData(msg) {
 
     clientMessage += `Наш продюсер скоро свяжется с вами для уточнения деталей! 😊`;
 
-    await bot.sendMessage(chatId, clientMessage);
+    await bot.sendMessage(chatId, clientMessage, { reply_markup: MAIN_KEYBOARD });
 
-    // Сообщение менеджеру
     const managerChatId = process.env.MANAGER_CHAT_ID;
     if (managerChatId) {
       let managerMessage = `🔥 НОВЫЙ РАСЧЁТ ИЗ КАЛЬКУЛЯТОРА!\n\n`;
@@ -256,7 +259,6 @@ async function handleWebAppData(msg) {
       console.log(`✅ Уведомление отправлено менеджеру (${managerChatId})`);
     }
 
-    // Обновляем сессию
     if (session) {
       session.calculatorShown = true;
       session.brief.lastCalculation = {
@@ -271,7 +273,7 @@ async function handleWebAppData(msg) {
 
   } catch (err) {
     console.error('❌ Ошибка обработки web_app_data:', err);
-    await bot.sendMessage(chatId, '😅 Ошибка обработки. Попробуйте ещё раз или напишите продюсеру напрямую.');
+    await bot.sendMessage(chatId, '😅 Ошибка обработки. Попробуйте ещё раз или напишите продюсеру напрямую.', { reply_markup: MAIN_KEYBOARD });
   }
 }
 
@@ -313,17 +315,7 @@ bot.onText(/\/start/, async (msg) => {
 
 Давайте знакомиться! Как вас зовут и чем занимаетесь? 🚀`;
 
-  const mainKeyboard = {
-    keyboard: [
-      [{ text: '📺 О канале' }, { text: '🎯 Рекламные возможности' }],
-      [{ text: '💰 Посчитать бюджет' }],
-      [{ text: '📞 Связаться с менеджером' }]
-    ],
-    resize_keyboard: true,
-    persistent: true
-  };
-
-  await bot.sendMessage(chatId, greeting, { reply_markup: mainKeyboard });
+  await bot.sendMessage(chatId, greeting, { reply_markup: MAIN_KEYBOARD });
   await new Promise(resolve => setTimeout(resolve, 2000));
 
   const contactRequest = `Чтобы я мог отправить вам коммерческое предложение после расчёта, поделитесь контактом 👇`;
@@ -340,31 +332,21 @@ bot.onText(/\/start/, async (msg) => {
 });
 
 bot.onText(/\/menu/, async (msg) => {
-  const mainKeyboard = {
-    keyboard: [
-      [{ text: '📺 О канале' }, { text: '🎯 Рекламные возможности' }],
-      [{ text: '💰 Посчитать бюджет' }],
-      [{ text: '📞 Связаться с менеджером' }]
-    ],
-    resize_keyboard: true,
-    persistent: true
-  };
-
-  await bot.sendMessage(msg.chat.id, 'Меню открыто 👇', { reply_markup: mainKeyboard });
+  await bot.sendMessage(msg.chat.id, 'Меню открыто 👇', { reply_markup: MAIN_KEYBOARD });
 });
 
 bot.onText(/\/myid/, async (msg) => {
-  await bot.sendMessage(msg.chat.id, `Ваш Chat ID: ${msg.chat.id}`);
+  await bot.sendMessage(msg.chat.id, `Ваш Chat ID: ${msg.chat.id}`, { reply_markup: MAIN_KEYBOARD });
 });
 
 bot.onText(/\/test/, async (msg) => {
   const chatId = msg.chat.id;
   const managerChatId = process.env.MANAGER_CHAT_ID;
 
-  await bot.sendMessage(chatId, `🧪 Проверяю настройки...\n\nТвой Chat ID: ${chatId}\nMANAGER_CHAT_ID: ${managerChatId || 'НЕ НАСТРОЕН'}\n\nОтправляю тестовое уведомление...`);
+  await bot.sendMessage(chatId, `🧪 Проверяю настройки...\n\nТвой Chat ID: ${chatId}\nMANAGER_CHAT_ID: ${managerChatId || 'НЕ НАСТРОЕН'}\n\nОтправляю тестовое уведомление...`, { reply_markup: MAIN_KEYBOARD });
 
   if (!managerChatId) {
-    await bot.sendMessage(chatId, '❌ MANAGER_CHAT_ID не настроен');
+    await bot.sendMessage(chatId, '❌ MANAGER_CHAT_ID не настроен', { reply_markup: MAIN_KEYBOARD });
     return;
   }
 
@@ -372,9 +354,9 @@ bot.onText(/\/test/, async (msg) => {
 
   try {
     await bot.sendMessage(managerChatId, testMessage);
-    await bot.sendMessage(chatId, `✅ Отправлено на ${managerChatId}`);
+    await bot.sendMessage(chatId, `✅ Отправлено на ${managerChatId}`, { reply_markup: MAIN_KEYBOARD });
   } catch (err) {
-    await bot.sendMessage(chatId, `❌ Ошибка: ${err.message}`);
+    await bot.sendMessage(chatId, `❌ Ошибка: ${err.message}`, { reply_markup: MAIN_KEYBOARD });
   }
 });
 
@@ -382,7 +364,7 @@ bot.onText(/\/clients/, async (msg) => {
   const chatId = msg.chat.id;
 
   if (chatId.toString() !== process.env.MANAGER_CHAT_ID) {
-    await bot.sendMessage(chatId, '❌ Команда только для менеджера');
+    await bot.sendMessage(chatId, '❌ Команда только для менеджера', { reply_markup: MAIN_KEYBOARD });
     return;
   }
 
@@ -406,14 +388,14 @@ bot.onText(/\/brief/, async (msg) => {
   const session = sessions.get(chatId);
 
   if (!session) {
-    await bot.sendMessage(chatId, '❌ Сессия не найдена. Напишите /start');
+    await bot.sendMessage(chatId, '❌ Сессия не найдена. Напишите /start', { reply_markup: MAIN_KEYBOARD });
     return;
   }
 
   const brief = session.brief;
   const briefText = `📋 ВАШ БРИФ:\n\nКонтакты:\n👤 ${brief.firstName || 'не указано'}\n📱 ${brief.phone || 'не указан'}\n💬 @${brief.telegramUsername || 'нет'}\n\nКомпания:\n🏢 ${brief.companyName || 'не указано'}\n💼 ${brief.companyBusiness || 'не указано'}\n📍 ${brief.city || 'не указано'}\n\nПроект:\n🎯 ${brief.task || 'не определена'}\n🎬 ${brief.format || 'не определен'}\n👥 ${brief.targetAudience || 'не определена'}\n💡 ${brief.creative || 'не обсуждался'}\n📺 ${brief.placement || 'не определено'}\n\nСтатус:\n🧮 Калькулятор: ${session.calculatorShown ? '✅' : '❌'}\n📞 Менеджер звонил: ${session.managerCalled ? '✅' : '❌'}`;
 
-  await bot.sendMessage(chatId, briefText);
+  await bot.sendMessage(chatId, briefText, { reply_markup: MAIN_KEYBOARD });
 });
 
 bot.on('contact', async (msg) => {
@@ -429,19 +411,9 @@ bot.on('contact', async (msg) => {
   session.contactShared = true;
   sessions.set(chatId, session);
 
-  const mainKeyboard = {
-    keyboard: [
-      [{ text: '📺 О канале' }, { text: '🎯 Рекламные возможности' }],
-      [{ text: '💰 Посчитать бюджет' }],
-      [{ text: '📞 Связаться с менеджером' }]
-    ],
-    resize_keyboard: true,
-    persistent: true
-  };
-
-  await bot.sendMessage(chatId, `Отлично! Записал ✅`, { reply_markup: mainKeyboard });
+  await bot.sendMessage(chatId, `Отлично! Записал ✅`, { reply_markup: MAIN_KEYBOARD });
   await new Promise(resolve => setTimeout(resolve, 1000));
-  await bot.sendMessage(chatId, `А теперь главный вопрос: что будем рекламировать? 🎯`);
+  await bot.sendMessage(chatId, `А теперь главный вопрос: что будем рекламировать? 🎯`, { reply_markup: MAIN_KEYBOARD });
 
   const managerChatId = process.env.MANAGER_CHAT_ID;
   if (managerChatId) {
@@ -475,7 +447,7 @@ bot.on('callback_query', async (query) => {
         console.error('Ошибка редактирования:', err.message);
       }
 
-      await bot.sendMessage(clientChatId, `Наш менеджер скоро свяжется с вами 😊`);
+      await bot.sendMessage(clientChatId, `Наш менеджер скоро свяжется с вами 😊`, { reply_markup: MAIN_KEYBOARD });
     } else {
       await bot.answerCallbackQuery(query.id, { text: '❌ Сессия не найдена' });
     }
@@ -502,11 +474,9 @@ bot.on('callback_query', async (query) => {
   }
 });
 
-// ГЛАВНЫЙ ОБРАБОТЧИК СООБЩЕНИЙ
 bot.on('message', async (msg) => {
   const chatId = msg.chat.id;
 
-  // 1) ЕСЛИ ЭТО ДАННЫЕ ИЗ WEB APP — ОБРАБАТЫВАЕМ И СРАЗУ ВЫХОДИМ
   if (msg.web_app_data) {
     await handleWebAppData(msg);
     return;
@@ -591,19 +561,9 @@ bot.on('message', async (msg) => {
         session.brief.phone = text.replace(/\s/g, '');
         session.contactShared = true;
 
-        const mainKeyboard = {
-          keyboard: [
-            [{ text: '📺 О канале' }, { text: '🎯 Рекламные возможности' }],
-            [{ text: '💰 Посчитать бюджет' }],
-            [{ text: '📞 Связаться с менеджером' }]
-          ],
-          resize_keyboard: true,
-          persistent: true
-        };
-
-        await bot.sendMessage(chatId, `Отлично! Записал ✅`, { reply_markup: mainKeyboard });
+        await bot.sendMessage(chatId, `Отлично! Записал ✅`, { reply_markup: MAIN_KEYBOARD });
         await new Promise(resolve => setTimeout(resolve, 1000));
-        await bot.sendMessage(chatId, `А теперь главный вопрос: что будем рекламировать? 🎯`);
+        await bot.sendMessage(chatId, `А теперь главный вопрос: что будем рекламировать? 🎯`, { reply_markup: MAIN_KEYBOARD });
 
         const managerChatId = process.env.MANAGER_CHAT_ID;
         if (managerChatId) {
@@ -617,19 +577,9 @@ bot.on('message', async (msg) => {
         session.brief.email = text;
         session.contactShared = true;
 
-        const mainKeyboard = {
-          keyboard: [
-            [{ text: '📺 О канале' }, { text: '🎯 Рекламные возможности' }],
-            [{ text: '💰 Посчитать бюджет' }],
-            [{ text: '📞 Связаться с менеджером' }]
-          ],
-          resize_keyboard: true,
-          persistent: true
-        };
-
-        await bot.sendMessage(chatId, `Отлично! Записал ✅`, { reply_markup: mainKeyboard });
+        await bot.sendMessage(chatId, `Отлично! Записал ✅`, { reply_markup: MAIN_KEYBOARD });
         await new Promise(resolve => setTimeout(resolve, 1000));
-        await bot.sendMessage(chatId, `А теперь главный вопрос: что будем рекламировать? 🎯`);
+        await bot.sendMessage(chatId, `А теперь главный вопрос: что будем рекламировать? 🎯`, { reply_markup: MAIN_KEYBOARD });
 
         const managerChatId = process.env.MANAGER_CHAT_ID;
         if (managerChatId) {
@@ -640,11 +590,14 @@ bot.on('message', async (msg) => {
         return;
       }
       else if (lowerText === '✍️ написать вручную') {
-        await bot.sendMessage(chatId, 'Напишите телефон или email:');
+        await bot.sendMessage(chatId, 'Напишите телефон или email:', { reply_markup: MAIN_KEYBOARD });
         return;
       }
     }
 
+    await bot.sendChatAction(chatId, 'typing');
+
+    const
     await bot.sendChatAction(chatId, 'typing');
 
     const contextToSend = session.context.slice(-12);
@@ -700,7 +653,7 @@ bot.on('message', async (msg) => {
     }
 
     if (aiResponse.message) {
-      await bot.sendMessage(chatId, aiResponse.message);
+      await bot.sendMessage(chatId, aiResponse.message, { reply_markup: MAIN_KEYBOARD });
     }
 
     if (aiResponse.readyForCalculator === true && !session.calculatorShown) {
@@ -708,7 +661,7 @@ bot.on('message', async (msg) => {
       sessions.set(chatId, session);
 
       await new Promise(resolve => setTimeout(resolve, 1000));
-      await bot.sendMessage(chatId, 'Давайте прикинем бюджет! Жмите кнопку внизу "💰 Посчитать бюджет" — я уже ввёл начальные данные! 🧮👇');
+      await bot.sendMessage(chatId, 'Давайте прикинем бюджет! Жмите кнопку внизу "💰 Посчитать бюджет" — я уже ввёл начальные данные! 🧮👇', { reply_markup: MAIN_KEYBOARD });
 
       const managerChatId = process.env.MANAGER_CHAT_ID;
       if (managerChatId) {
@@ -746,7 +699,7 @@ bot.on('message', async (msg) => {
 
   } catch (err) {
     console.error('Ошибка обработки сообщения:', err);
-    await bot.sendMessage(chatId, 'Произошла ошибка 😅 Попробуйте ещё раз или напишите /start');
+    await bot.sendMessage(chatId, 'Произошла ошибка 😅 Попробуйте ещё раз или напишите /start', { reply_markup: MAIN_KEYBOARD });
   }
 });
 
