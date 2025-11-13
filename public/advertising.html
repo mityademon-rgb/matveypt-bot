@@ -79,28 +79,6 @@
       }
     }
 
-    @keyframes slideRight{
-      from{
-        opacity:0;
-        transform:translateX(-20px);
-      }
-      to{
-        opacity:1;
-        transform:translateX(0);
-      }
-    }
-
-    @keyframes scaleIn{
-      from{
-        opacity:0;
-        transform:scale(0.95);
-      }
-      to{
-        opacity:1;
-        transform:scale(1);
-      }
-    }
-
     @keyframes shimmer{
       0%{
         background-position:-1000px 0;
@@ -137,31 +115,29 @@
     .hero-bg{
       position:absolute;
       inset:0;
-      background:url("https://1tourtv.ru/wp-content/uploads/2025/08/01ab972b-a83d-4af9-8cd7-6beaf843adc5-2.jpg") center/cover no-repeat;
-      opacity:.15;
-      filter:grayscale(20%);
+      background:url("https://1tourtv.ru/wp-content/uploads/2025/08/954e7e8f-65cd-47fa-80ff-138d5584fa06.jpg") center/cover no-repeat;
+      opacity:.2;
+      filter:grayscale(10%);
     }
 
     .hero-overlay{
       position:absolute;
       inset:0;
       background:
-        radial-gradient(circle at 20% 30%, rgba(243,112,33,.15) 0%, transparent 50%),
-        linear-gradient(135deg, rgba(0,0,0,.8) 0%, rgba(0,0,0,.4) 100%);
+        radial-gradient(circle at 20% 30%, rgba(243,112,33,.2) 0%, transparent 50%),
+        linear-gradient(135deg, rgba(0,0,0,.85) 0%, rgba(0,0,0,.6) 100%);
     }
 
     .hero-inner{
       position:relative;
-      padding:32px 24px;
-      display:flex;
-      flex-direction:column;
-      gap:20px;
+      padding:32px 24px 24px;
     }
 
     .hero-top{
       display:flex;
       align-items:flex-start;
       gap:16px;
+      margin-bottom:24px;
     }
 
     .hero-logo-wrap{
@@ -174,8 +150,8 @@
       align-items:center;
       justify-content:center;
       overflow:hidden;
-      box-shadow:0 8px 24px rgba(0,0,0,.25);
-      border:2px solid rgba(255,255,255,.2);
+      box-shadow:0 8px 24px rgba(0,0,0,.3);
+      border:2px solid rgba(255,255,255,.15);
     }
 
     .hero-logo-wrap img{
@@ -195,9 +171,9 @@
       gap:8px;
       padding:6px 14px;
       border-radius:999px;
-      background:rgba(243,112,33,.2);
+      background:rgba(243,112,33,.25);
       backdrop-filter:blur(8px);
-      border:1px solid rgba(243,112,33,.4);
+      border:1px solid rgba(243,112,33,.5);
       font-size:11px;
       font-weight:700;
       letter-spacing:.05em;
@@ -206,7 +182,7 @@
     }
 
     .hero-title{
-      font-size:28px;
+      font-size:26px;
       font-weight:900;
       line-height:1.2;
       margin-top:12px;
@@ -215,51 +191,73 @@
     }
 
     .hero-subtitle{
-      font-size:15px;
+      font-size:14px;
       font-weight:500;
       line-height:1.5;
       margin-top:8px;
-      color:rgba(255,255,255,.85);
+      color:rgba(255,255,255,.8);
     }
 
-    .hero-tags{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:16px;
+    /* ПЛИТОЧКИ В HERO */
+    .hero-tiles{
+      display:grid;
+      grid-template-columns:repeat(4, 1fr);
+      gap:10px;
+      margin-top:20px;
     }
 
-    .hero-tag{
-      font-size:12px;
-      padding:6px 12px;
-      border-radius:999px;
-      background:rgba(255,255,255,.12);
-      backdrop-filter:blur(8px);
+    .hero-tile{
+      background:rgba(255,255,255,.1);
+      backdrop-filter:blur(12px);
       border:1px solid rgba(255,255,255,.2);
-      font-weight:600;
-      color:var(--white);
-      transition:all .2s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius:16px;
+      padding:12px 10px;
+      text-align:center;
+      transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor:default;
     }
 
-    .hero-tag:hover{
-      background:rgba(255,255,255,.2);
-      transform:translateY(-2px);
+    .hero-tile:hover{
+      background:rgba(243,112,33,.3);
+      border-color:rgba(243,112,33,.6);
+      transform:translateY(-3px);
+    }
+
+    .hero-tile-icon{
+      font-size:24px;
+      margin-bottom:6px;
+      filter:drop-shadow(0 2px 4px rgba(0,0,0,.3));
+    }
+
+    .hero-tile-label{
+      font-size:11px;
+      font-weight:700;
+      color:var(--white);
+      line-height:1.3;
     }
 
     /* ============ СЕКЦИИ ============ */
     .section{
+      position:relative;
       background:var(--white);
       border-radius:24px;
       padding:28px 24px;
       margin-bottom:20px;
       border:1px solid var(--gray-200);
       box-shadow:var(--shadow-md);
-      transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow:hidden;
     }
 
-    .section:hover{
-      box-shadow:var(--shadow-lg);
-      transform:translateY(-2px);
+    .section::before{
+      content:'';
+      position:absolute;
+      top:0;
+      right:0;
+      width:200px;
+      height:200px;
+      background:url("https://1tourtv.ru/wp-content/uploads/2025/07/highlight-1.png") center/contain no-repeat;
+      opacity:.08;
+      pointer-events:none;
     }
 
     .section-title{
@@ -271,6 +269,8 @@
       display:flex;
       align-items:center;
       gap:10px;
+      position:relative;
+      z-index:1;
     }
 
     .section-title::before{
@@ -286,6 +286,8 @@
       line-height:1.7;
       color:var(--gray-600);
       margin-bottom:12px;
+      position:relative;
+      z-index:1;
     }
 
     .section-text strong{
@@ -293,31 +295,62 @@
       font-weight:700;
     }
 
-    /* ============ CHIPS ============ */
-    .chips{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:16px;
+    /* ============ КОМУ ПОДХОДИТ — КОМПАКТНЫЕ КАРТОЧКИ ============ */
+    .target-grid{
+      display:grid;
+      grid-template-columns:repeat(3, 1fr);
+      gap:10px;
+      margin-top:20px;
     }
 
-    .chip{
-      font-size:13px;
-      padding:8px 16px;
-      border-radius:999px;
-      background:linear-gradient(135deg, #fff5f0 0%, #ffe8e0 100%);
-      border:1px solid var(--gray-200);
-      font-weight:600;
-      color:var(--gray-700);
-      transition:all .2s cubic-bezier(0.4, 0, 0.2, 1);
+    .target-card{
+      background:linear-gradient(135deg, var(--white) 0%, var(--gray-50) 100%);
+      border:1.5px solid var(--gray-200);
+      border-radius:16px;
+      padding:16px 12px;
+      text-align:center;
+      transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
       cursor:default;
+      position:relative;
+      overflow:hidden;
     }
 
-    .chip:hover{
-      background:linear-gradient(135deg, var(--brand) 0%, var(--brand-light) 100%);
-      color:var(--white);
-      transform:translateY(-2px);
-      box-shadow:var(--shadow);
+    .target-card::before{
+      content:'';
+      position:absolute;
+      inset:0;
+      background:linear-gradient(135deg, rgba(243,112,33,.05) 0%, transparent 100%);
+      opacity:0;
+      transition:opacity .3s;
+    }
+
+    .target-card:hover::before{
+      opacity:1;
+    }
+
+    .target-card:hover{
+      background:var(--gray-100);
+      border-color:var(--gray-400);
+      transform:translateY(-4px);
+      box-shadow:var(--shadow-lg);
+    }
+
+    .target-icon{
+      font-size:32px;
+      margin-bottom:8px;
+      filter:grayscale(0);
+      transition:filter .3s;
+    }
+
+    .target-card:hover .target-icon{
+      filter:grayscale(100%);
+    }
+
+    .target-label{
+      font-size:12px;
+      font-weight:700;
+      color:var(--gray-800);
+      line-height:1.4;
     }
 
     /* ============ СТАТИСТИКА ============ */
@@ -385,34 +418,34 @@
       font-style:italic;
     }
 
-    /* ============ ФОРМАТЫ ============ */
+    /* ============ ФОРМАТЫ — КОМПАКТНЫЕ КАРТОЧКИ ============ */
     .format-grid{
-      display:flex;
-      flex-direction:column;
-      gap:16px;
+      display:grid;
+      grid-template-columns:repeat(2, 1fr);
+      gap:14px;
       margin-top:20px;
     }
 
     .format-card{
       border-radius:20px;
-      padding:20px;
-      background:linear-gradient(135deg, var(--white) 0%, var(--gray-50) 100%);
-      border:1px solid var(--gray-200);
-      display:flex;
-      gap:16px;
-      align-items:flex-start;
-      transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
-      position:relative;
+      padding:0;
+      background:var(--white);
+      border:1.5px solid var(--gray-200);
       overflow:hidden;
+      transition:all .3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor:default;
+      position:relative;
     }
 
     .format-card::before{
       content:'';
       position:absolute;
       inset:0;
-      background:linear-gradient(135deg, rgba(243,112,33,.05) 0%, transparent 100%);
+      background:linear-gradient(135deg, rgba(0,0,0,.6) 0%, transparent 100%);
       opacity:0;
-      transition:opacity .3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition:opacity .3s;
+      z-index:1;
+      pointer-events:none;
     }
 
     .format-card:hover::before{
@@ -420,40 +453,38 @@
     }
 
     .format-card:hover{
-      transform:translateX(4px);
+      transform:translateY(-4px);
       box-shadow:var(--shadow-lg);
-      border-color:var(--brand);
+      border-color:var(--gray-400);
     }
 
-    .format-icon{
-      flex-shrink:0;
-      width:64px;
-      height:64px;
-      border-radius:18px;
+    .format-image{
+      width:100%;
+      height:140px;
       overflow:hidden;
-      background:var(--gray-900);
       position:relative;
-      box-shadow:var(--shadow-md);
     }
 
-    .format-icon img{
+    .format-image img{
       width:100%;
       height:100%;
       object-fit:cover;
-      transition:transform .4s cubic-bezier(0.4, 0, 0.2, 1);
+      transition:transform .4s cubic-bezier(0.4, 0, 0.2, 1), filter .3s;
     }
 
-    .format-card:hover .format-icon img{
-      transform:scale(1.1);
+    .format-card:hover .format-image img{
+      transform:scale(1.08);
+      filter:grayscale(100%);
     }
 
     .format-body{
-      flex:1;
-      min-width:0;
+      padding:14px 16px 16px;
+      position:relative;
+      z-index:2;
     }
 
     .format-tagline{
-      font-size:11px;
+      font-size:10px;
       text-transform:uppercase;
       letter-spacing:.08em;
       color:var(--brand);
@@ -462,15 +493,16 @@
     }
 
     .format-title{
-      font-size:17px;
+      font-size:15px;
       font-weight:800;
       margin-bottom:6px;
       color:var(--gray-900);
       letter-spacing:-.01em;
+      line-height:1.3;
     }
 
     .format-text{
-      font-size:14px;
+      font-size:12px;
       line-height:1.6;
       color:var(--gray-600);
     }
@@ -557,12 +589,14 @@
       transform:translateX(4px);
     }
 
-    /* ============ PRICE BOX ============ */
+    /* ============ PRICE BOX С ФОНОМ ============ */
     .price-box{
       margin-top:24px;
       border-radius:20px;
       padding:24px;
-      background:linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+      background:
+        url("https://1tourtv.ru/wp-content/uploads/2025/07/promo-cta-bg-1.png") center/cover no-repeat,
+        linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
       color:var(--white);
       text-align:left;
       box-shadow:var(--shadow-brand);
@@ -577,8 +611,8 @@
       right:-50%;
       width:200%;
       height:200%;
-      background:radial-gradient(circle, rgba(255,255,255,.1) 0%, transparent 70%);
-      animation:shimmer 3s infinite;
+      background:radial-gradient(circle, rgba(255,255,255,.15) 0%, transparent 70%);
+      animation:shimmer 4s infinite;
     }
 
     .price-box > *{
@@ -605,6 +639,14 @@
       margin-top:12px;
       opacity:.9;
       line-height:1.6;
+    }
+
+    /* ============ СЕКЦИЯ С ФОНОВОЙ КАРТИНКОЙ ============ */
+    .section-with-bg{
+      position:relative;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.97) 0%, rgba(255,255,255,.95) 100%),
+        url("https://1tourtv.ru/wp-content/uploads/2025/08/c400344d-778e-4c23-a3d6-c968937adeb2.jpg") center/cover no-repeat;
     }
 
     /* ============ FOOTER ============ */
@@ -688,11 +730,16 @@
       }
 
       .hero-inner{
-        padding:24px 20px;
+        padding:24px 20px 20px;
       }
 
       .hero-title{
-        font-size:24px;
+        font-size:22px;
+      }
+
+      .hero-tiles{
+        grid-template-columns:repeat(2, 1fr);
+        gap:8px;
       }
 
       .section{
@@ -703,18 +750,17 @@
         font-size:18px;
       }
 
+      .target-grid{
+        grid-template-columns:repeat(2, 1fr);
+      }
+
       .stat-row{
         grid-template-columns:1fr;
         gap:10px;
       }
 
-      .format-card{
-        flex-direction:column;
-      }
-
-      .format-icon{
-        width:100%;
-        height:160px;
+      .format-grid{
+        grid-template-columns:1fr;
       }
 
       .price-value{
@@ -750,32 +796,89 @@
               Канал, который влияет на выбор путешествий
             </div>
             <div class="hero-subtitle">
-              Гости отелей, зрители IPTV и аудитория соцсетей — в одном медиапространстве.
+              Федеральная площадка для рекламы туризма, отелей, брендов и сервисов.
             </div>
           </div>
         </div>
-        <div class="hero-tags">
-          <span class="hero-tag">Эфир 24/7</span>
-          <span class="hero-tag">Отельное ТВ</span>
-          <span class="hero-tag">Digital + соцсети</span>
+
+        <!-- ПЛИТОЧКИ -->
+        <div class="hero-tiles">
+          <div class="hero-tile">
+            <div class="hero-tile-icon">📺</div>
+            <div class="hero-tile-label">Эфир 24/7</div>
+          </div>
+          <div class="hero-tile">
+            <div class="hero-tile-icon">🏨</div>
+            <div class="hero-tile-label">Отели РФ и Турция</div>
+          </div>
+          <div class="hero-tile">
+            <div class="hero-tile-icon">📱</div>
+            <div class="hero-tile-label">Соцсети</div>
+          </div>
+          <div class="hero-tile">
+            <div class="hero-tile-icon">🌐</div>
+            <div class="hero-tile-label">Digital</div>
+          </div>
         </div>
       </div>
     </section>
 
     <!-- КОМУ ПОДХОДИТ -->
-    <section class="section reveal d2">
-      <div class="section-title">Кому эта площадка особенно заходит</div>
+    <section class="section section-with-bg reveal d2">
+      <div class="section-title">Кому подходит эта площадка</div>
       <div class="section-text">
-        Мы работаем с теми, у кого путешествия и сервис — ядро бизнеса. В эфире канала ваша реклама оказывается рядом с реальными маршрутами и живыми историями.
+        Мы работаем со всеми, кто хочет рассказать о себе путешественникам: от турагентств до брендов техники и одежды. Специальные форматы под каждый бизнес.
       </div>
 
-      <div class="chips">
-        <span class="chip">Турагентства и туроператоры</span>
-        <span class="chip">Отели, курорты, санатории</span>
-        <span class="chip">Регионы и города</span>
-        <span class="chip">Авиакомпании и ЖД</span>
-        <span class="chip">Страховые компании</span>
-        <span class="chip">Бренды для путешествий</span>
+      <div class="target-grid">
+        <div class="target-card">
+          <div class="target-icon">✈️</div>
+          <div class="target-label">Турагентства и операторы</div>
+        </div>
+        <div class="target-card">
+          <div class="target-icon">🏨</div>
+          <div class="target-label">Отели и курорты</div>
+        </div>
+        <div class="target-card">
+          <div class="target-icon">🌍</div>
+          <div class="target-label">Регионы и города</div>
+        </div>
+        <div class="target-card">
+          <div class="target-icon">🛫</div>
+          <div class="target-label">Авиа и ЖД</div>
+        </div>
+        <div class="target-card">
+          <div class="target-icon">🛡️</div>
+          <div class="target-label">Страховые компании</div>
+        </div>
+        <div class="target-card">
+          <div class="target-icon">🎒</div>
+          <div class="target-label">Товары для путешествий</div>
+        </div>
+        <div class="target-card">
+          <div class="target-icon">📱</div>
+          <div class="target-label">Гаджеты и техника</div>
+        </div>
+        <div class="target-card">
+          <div class="target-icon">👕</div>
+          <div class="target-label">Одежда и обувь</div>
+        </div>
+        <div class="target-card">
+          <div class="target-icon">🍴</div>
+          <div class="target-label">Рестораны и кафе</div>
+        </div>
+        <div class="target-card">
+          <div class="target-icon">🏬</div>
+          <div class="target-label">Торговые сети</div>
+        </div>
+        <div class="target-card">
+          <div class="target-icon">🏦</div>
+          <div class="target-label">Банки и финансы</div>
+        </div>
+        <div class="target-card">
+          <div class="target-icon">🚗</div>
+          <div class="target-label">Авто и такси</div>
+        </div>
       </div>
 
       <div class="stat-row">
@@ -806,153 +909,5 @@
 
       <div class="format-grid">
         <div class="format-card">
-          <div class="format-icon">
-            <img src="https://1tourtv.ru/wp-content/uploads/2025/08/photo_2025-08-09_09-40-48.jpg" alt="Ролики в эфире">
-          </div>
-          <div class="format-body">
-            <div class="format-tagline">Эфир</div>
-            <div class="format-title">Рекламные ролики</div>
-            <div class="format-text">
-              Классический показ 10–60 сек в эфире канала: отельные сети, IPTV, кабель. Подходит для быстрого запуска кампании и наращивания узнаваемости.
-            </div>
-          </div>
-        </div>
-
-        <div class="format-card">
-          <div class="format-icon">
-            <img src="https://1tourtv.ru/wp-content/uploads/2025/09/photo_2025-07-22_12-34-16-1.jpg" alt="Спонсорство программ">
-          </div>
-          <div class="format-body">
-            <div class="format-tagline">Имидж</div>
-            <div class="format-title">Спонсорство программ</div>
-            <div class="format-text">
-              Ваш бренд сопровождает любимые рубрики и трэвел-шоу: заставки, упоминания, логотип в кадре. Формат для тех, кому важен статус и ассоциации.
-            </div>
-          </div>
-        </div>
-
-        <div class="format-card">
-          <div class="format-icon">
-            <img src="https://1tourtv.ru/wp-content/uploads/2025/09/photo_2025-09-27_11-55-56.jpg" alt="Интеграции с блогерами">
-          </div>
-          <div class="format-body">
-            <div class="format-tagline">Натив</div>
-            <div class="format-title">Интеграции с блогерами</div>
-            <div class="format-text">
-              Истории «как оно есть»: блогер едет по вашему маршруту, живёт в вашем отеле, пользуется вашим сервисом — и рассказывает об этом зрителю и своей аудитории.
-            </div>
-          </div>
-        </div>
-
-        <div class="format-card">
-          <div class="format-icon">
-            <img src="https://1tourtv.ru/wp-content/uploads/2025/08/photo_2025-08-02_10-34-14.jpg" alt="Спецпроекты">
-          </div>
-          <div class="format-body">
-            <div class="format-tagline">Спецпроект</div>
-            <div class="format-title">Фильм о бренде или регионе</div>
-            <div class="format-text">
-              От идеи и сценария до съёмок, монтажа и эфира. Отдельный выпуск, полностью собранный вокруг вашего направления или продукта, с повторными показами и digital-поддержкой.
-            </div>
-          </div>
-        </div>
-
-        <div class="format-card">
-          <div class="format-icon">
-            <img src="https://1tourtv.ru/wp-content/uploads/2025/07/2025-07-29-15.36.36.jpg" alt="Digital">
-          </div>
-          <div class="format-body">
-            <div class="format-tagline">Digital</div>
-            <div class="format-title">Сайт, соцсети и видео</div>
-            <div class="format-text">
-              Публикации и подборки на 1tourtv.ru, посты в VK, OK и Telegram, размещения на YouTube и RuTube. ТВ-эфир подкрепляется цифровым охватом.
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ПРЕИМУЩЕСТВА -->
-    <section class="section reveal d4">
-      <div class="section-title">Почему реклама здесь работает</div>
-      <div class="check-list">
-        <div class="check-item">
-          <strong>Попадание в момент выбора.</strong> Зритель уже думает о поездке — вы появляетесь в нужном контексте.
-        </div>
-        <div class="check-item">
-          <strong>Отельная аудитория.</strong> Канал включён прямо в номере: время просмотра дольше, внимание выше.
-        </div>
-        <div class="check-item">
-          <strong>Медиамикс «ТВ + Digital».</strong> Эфир поддерживается соцсетями и сайтом, заметность растёт.
-        </div>
-        <div class="check-item">
-          <strong>Честная подача.</strong> Блогерский стиль и живые форматы вызывают доверие к истории бренда.
-        </div>
-        <div class="check-item">
-          <strong>Гибкость пакетов.</strong> От тестовой недели до годового партнёрства и спецпроекта.
-        </div>
-      </div>
-
-      <div class="price-box">
-        <div class="price-label">Минимальный бюджет размещения</div>
-        <div class="price-value">от 450 000 ₽</div>
-        <div class="price-note">
-          Точная смета зависит от формата, длительности и состава медиамикса. Всё можно адаптировать под ваши задачи, а не под «типовой прайс».
-        </div>
-      </div>
-    </section>
-
-    <!-- КАК НАЧАТЬ -->
-    <section class="section reveal d5">
-      <div class="section-title">Как мы запускаем кампанию</div>
-      <div class="section-text">
-        Чем проще процесс для вас, тем лучше. Продюсер ведёт проект от брифа до отчёта.
-      </div>
-      <ol class="steps">
-        <li><strong>Знакомство и бриф.</strong> Понимаем продукт, географию, сезон и желаемый результат.</li>
-        <li><strong>Черновой бюджет.</strong> Собираем варианты пакетов и медиамикса, даём вилку по стоимости.</li>
-        <li><strong>Креатив и сценарий.</strong> Если ролика ещё нет, предлагаем концепцию и формат истории.</li>
-        <li><strong>Производство и эфир.</strong> Съёмка, монтаж, анимация и запуск в эфир + цифровую поддержку.</li>
-        <li><strong>Отчёт и донастройка.</strong> Показы, выходы, обратная связь, рекомендации на следующий этап.</li>
-      </ol>
-
-      <div class="section-text" style="margin-top:16px">
-        Если у вас уже есть готовый ролик или блогерский выпуск — запустим кампанию быстрее, сосредоточив бюджет на охвате.
-      </div>
-    </section>
-
-  </div>
-
-  <div class="footer-bar">
-    <div class="footer-inner">
-      <button type="button" id="backBtn" class="btn btn-secondary">⬅ Назад в Telegram</button>
-      <button type="button" id="calcBtn" class="btn btn-primary">💰 Рассчитать бюджет</button>
-    </div>
-  </div>
-
-  <script>
-    const tg = window.Telegram ? window.Telegram.WebApp : null;
-
-    if (tg){
-      tg.ready();
-      tg.expand();
-    }
-
-    document.getElementById('backBtn').addEventListener('click', ()=>{
-      if (tg){
-        try{ tg.HapticFeedback && tg.HapticFeedback.impactOccurred('light'); }catch(e){}
-        tg.close();
-      }else{
-        window.history.back();
-      }
-    });
-
-    document.getElementById('calcBtn').addEventListener('click', ()=>{
-      if (tg){
-        try{ tg.HapticFeedback && tg.HapticFeedback.impactOccurred('medium'); }catch(e){}
-      }
-      window.location.href = '/calculator.html';
-    });
-  </script>
-</body>
-</html>
+          <div class="format-image">
+            <img src="https://1tourtv.ru/wp-content/uploads/2025/08
