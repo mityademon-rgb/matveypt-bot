@@ -338,6 +338,113 @@ bot.on('web_app_data', async (msg) => {
     await bot.sendMessage(chatId, '😅 Что-то пошло не так. Попробуйте ещё раз или напишите /start');
   }
 });
+// ===== ОБРАБОТКА ДАННЫХ ИЗ КАЛЬКУЛЯТОРА =====
+bot.on('web_app_data', async (msg) => {
+  const chatId = msg.chat.id;
+  
+  console.log('🎯 WEB_APP_DATA получен!');
+  console.log('Raw data:', msg.web_app_data);
+  
+  try {
+    const data = JSON.parse(msg.web_app_data.data);
+    console.log('📊 Данные распарсены:', data);
+    
+    const session = sessions.get(chatId);
+    const brief = session?.brief || {
+      firstName: msg.from.first_name,
+      telegramUsername: msg.from.username,
+      phone: null
+    };
+    
+    // СООБЩЕНИЕ КЛИЕНТУ
+    let clientMsg = `✅ Ваш расчёт получен!\n\n💰 Итого: ${data.total.toLocaleString('ru-RU')} ₽\n\n`;
+    
+    if (data.production && data.production.length > 0) {
+      clientMsg += `🎬 Производство:\n`;
+      data.production.forEach(item => {
+        clientMsg += `   • ${item}\n`;
+      });
+      clientMsg += `\n`;
+    }
+    
+    if (data.blogger) {
+      clientMsg += `👤 Блогер: ${data.blogger}\n\n`;
+    }
+    
+    if (data.package) {
+      clientMsg += `📺 Пакет: ${data.package}\n\n`;
+    }
+    
+    clientMsg += `Наш продюсер скоро свяжется с вами! 😊`;
+    
+    await bot.sendMessage(chatId, clientMsg);
+    
+    // УВЕДОМЛЕНИЕ МЕНЕДЖЕРУ
+    const managerChatId = process.env.MANAGER_CHAT_ID;
+    if (managerChatId) {
+      let managerMsg = `🔥 РАСЧЁТ ИЗ КАЛЬКУЛЯТОРА!\n\n`;
+      managerMsg += `👤 ${brief.firstName || 'Не указано'}\n`;
+      managerMsg += `📱 ${brief.phone || 'НЕТ'}\n`;
+      managerMsg += `💬 @${brief.telegramUsername || 'нет'}\n`;
+      managerMsg += `🆔 ${chatId}\n\n`;
+      managerMsg += `━━━━━━━━━━━━━━━━━━━━\n`;
+      managerMsg += `💰 ИТОГО: ${data.total.toLocaleString('ru-RU')} ₽\n`;
+      managerMsg += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+      
+      if (data.production && data.production.length > 0) {
+        managerMsg += `🎬 Производство (${data.productionPrice.toLocaleString('ru-RU')} ₽):\n`;
+        data.production.forEach(item => {
+          managerMsg += `   ✓ ${item}\n`;
+        });
+        managerMsg += `\n`;
+      }
+      
+      if (data.blogger) {
+        managerMsg += `👤 Блогер: ${data.blogger} (${data.bloggerPrice.toLocaleString('ru-RU')} ₽)\n\n`;
+      }
+      
+      if (data.package) {
+        managerMsg += `📺 Пакет: ${data.package} (${data.packagePrice.toLocaleString('ru-RU')} ₽)\n\n`;
+      }
+      
+      managerMsg += `⏰ ${new Date().toLocaleString('ru-RU')}\n\n`;
+      managerMsg += `🔥 ЗВОНИТЬ СРОЧНО!`;
+      
+      const keyboard = {
+        inline_keyboard: [
+          [{ 
+            text: '💬 Написать клиенту', 
+            url: brief.telegramUsername ? `https://t.me/${brief.telegramUsername}` : `tg://user?id=${chatId}` 
+          }],
+          [
+            { text: '✅ Позвонил', callback_data: `called_${chatId}` },
+            { text: '🎉 Закрыл сделку', callback_data: `closed_${chatId}` }
+          ]
+        ]
+      };
+      
+      await bot.sendMessage(managerChatId, managerMsg, { reply_markup: keyboard });
+      console.log('✅ Уведомление отправлено менеджеру');
+    }
+    
+    // Обновляем сессию
+    if (session) {
+      session.calculatorShown = true;
+      session.brief.lastCalculation = {
+        total: data.total,
+        package: data.package,
+        production: data.production,
+        blogger: data.blogger,
+        timestamp: Date.now()
+      };
+      sessions.set(chatId, session);
+    }
+    
+  } catch (err) {
+    console.error('❌ Ошибка обработки web_app_data:', err);
+    await bot.sendMessage(chatId, '😅 Ошибка обработки. Попробуйте ещё раз или напишите продюсеру напрямую.');
+  }
+});
 
 bot.on('callback_query', async (query) => {
   const data = query.data;
