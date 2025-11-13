@@ -28,6 +28,114 @@ app.post('/api/calculate', (req, res) => {
   });
   res.json(packages);
 });
+// ENDPOINT ДЛЯ ПОЛУЧЕНИЯ ДАННЫХ ИЗ КАЛЬКУЛЯТОРА
+app.post('/api/budget', async (req, res) => {
+  console.log('💰 POST /api/budget получен!');
+  console.log('Body:', req.body);
+
+  try {
+    const data = req.body;
+    const chatId = data.chatId || null;
+    const managerChatId = process.env.MANAGER_CHAT_ID;
+
+    if (!managerChatId) {
+      console.error('❌ MANAGER_CHAT_ID не настроен');
+      return res.status(500).json({ success: false, error: 'Manager not configured' });
+    }
+
+    // ФОРМИРУЕМ СООБЩЕНИЕ МЕНЕДЖЕРУ
+    let managerMessage = `🔥 НОВЫЙ РАСЧЁТ ИЗ КАЛЬКУЛЯТОРА!\n\n`;
+    
+    if (chatId) {
+      const session = sessions.get(chatId);
+      if (session && session.brief) {
+        managerMessage += `👤 ${session.brief.firstName || 'Не указано'}\n`;
+        managerMessage += `📱 ${session.brief.phone || 'НЕТ'}\n`;
+        managerMessage += `💬 @${session.brief.telegramUsername || 'нет'}\n`;
+      }
+      managerMessage += `🆔 Chat ID: ${chatId}\n\n`;
+    } else {
+      managerMessage += `⚠️ Анонимный расчёт (chatId не передан)\n\n`;
+    }
+
+    managerMessage += `━━━━━━━━━━━━━━━━━━━━\n`;
+    managerMessage += `💰 ИТОГО: ${data.total.toLocaleString('ru-RU')} ₽\n`;
+    managerMessage += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+    if (data.production && data.production.length > 0) {
+      managerMessage += `🎬 Производство (${data.productionPrice.toLocaleString('ru-RU')} ₽):\n`;
+      data.production.forEach(item => {
+        managerMessage += `   ✓ ${item}\n`;
+      });
+      managerMessage += `\n`;
+    }
+
+    if (data.blogger) {
+      managerMessage += `👤 Блогер: ${data.blogger}\n`;
+      managerMessage += `💵 ${data.bloggerPrice.toLocaleString('ru-RU')} ₽\n\n`;
+    }
+
+    if (data.package) {
+      managerMessage += `📺 Пакет: ${data.package}\n`;
+      managerMessage += `💵 ${data.packagePrice.toLocaleString('ru-RU')} ₽\n\n`;
+    }
+
+    managerMessage += `⏰ ${new Date().toLocaleString('ru-RU')}\n\n`;
+    managerMessage += `🔥 ЗВОНИТЬ СРОЧНО — КЛИЕНТ ГОРЯЧИЙ!`;
+
+    const managerKeyboard = chatId ? {
+      inline_keyboard: [
+        [{
+          text: '💬 Написать клиенту',
+          url: `tg://user?id=${chatId}`
+        }],
+        [
+          { text: '✅ Я позвонил', callback_data: `called_${chatId}` },
+          { text: '🎉 Сделка закрыта', callback_data: `closed_${chatId}` }
+        ]
+      ]
+    } : undefined;
+
+    // ОТПРАВЛЯЕМ МЕНЕДЖЕРУ
+    await bot.sendMessage(managerChatId, managerMessage, {
+      reply_markup: managerKeyboard
+    });
+
+    console.log(`✅ Уведомление отправлено менеджеру через HTTP POST`);
+
+    // ОТПРАВЛЯЕМ КЛИЕНТУ (если есть chatId)
+    if (chatId) {
+      let clientMessage = `✅ Ваш расчёт получен!\n\n💰 ИТОГО: ${data.total.toLocaleString('ru-RU')} ₽\n\n`;
+
+      if (data.production && data.production.length > 0) {
+        clientMessage += `🎬 Производство (${data.productionPrice.toLocaleString('ru-RU')} ₽):\n`;
+        data.production.forEach(item => {
+          clientMessage += `   • ${item}\n`;
+        });
+        clientMessage += `\n`;
+      }
+
+      if (data.blogger) {
+        clientMessage += `👤 Блогер: ${data.blogger} (${data.bloggerPrice.toLocaleString('ru-RU')} ₽)\n\n`;
+      }
+
+      if (data.package) {
+        clientMessage += `📺 Пакет: ${data.package} (${data.packagePrice.toLocaleString('ru-RU')} ₽)\n\n`;
+      }
+
+      clientMessage += `Наш продюсер скоро свяжется с вами! 😊`;
+
+      await bot.sendMessage(chatId, clientMessage);
+      console.log(`✅ Подтверждение отправлено клиенту`);
+    }
+
+    res.json({ success: true, message: 'Budget calculation received' });
+
+  } catch (err) {
+    console.error('❌ Ошибка обработки POST /api/budget:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
