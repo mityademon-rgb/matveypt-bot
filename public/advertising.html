@@ -115,9 +115,9 @@
     .hero-bg{
       position:absolute;
       inset:0;
-      background:url("https://1tourtv.ru/wp-content/uploads/2025/08/954e7e8f-65cd-47fa-80ff-138d5584fa06.jpg") center/cover no-repeat;
-      opacity:.2;
-      filter:grayscale(10%);
+      background:url("https://1tourtv.ru/wp-content/uploads/2025/07/image-pricing-2-1.png") center/cover no-repeat;
+      opacity:.3;
+      filter:grayscale(0);
     }
 
     .hero-overlay{
@@ -131,6 +131,50 @@
     .hero-inner{
       position:relative;
       padding:32px 24px 24px;
+    }
+
+    /* ВИДЕО В HERO */
+    .hero-video-wrap{
+      position:relative;
+      width:100%;
+      max-width:100%;
+      margin-bottom:20px;
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 12px 32px rgba(0,0,0,.4);
+      border:2px solid rgba(255,255,255,.15);
+      background:#000;
+    }
+
+    .hero-video{
+      width:100%;
+      height:auto;
+      display:block;
+      max-height:400px;
+      object-fit:contain;
+    }
+
+    .video-hint{
+      position:absolute;
+      bottom:12px;
+      left:50%;
+      transform:translateX(-50%);
+      padding:8px 16px;
+      border-radius:999px;
+      background:rgba(0,0,0,.8);
+      backdrop-filter:blur(8px);
+      color:#fff;
+      font-size:12px;
+      font-weight:700;
+      pointer-events:none;
+      opacity:1;
+      transition:opacity .3s;
+      border:1px solid rgba(255,255,255,.2);
+    }
+
+    .hero-video-wrap:hover .video-hint,
+    .hero-video-wrap.playing .video-hint{
+      opacity:0;
     }
 
     .hero-top{
@@ -737,6 +781,16 @@
         font-size:22px;
       }
 
+      .hero-video{
+        max-height:300px;
+      }
+
+      .video-hint{
+        font-size:11px;
+        padding:6px 12px;
+        bottom:8px;
+      }
+
       .hero-tiles{
         grid-template-columns:repeat(2, 1fr);
         gap:8px;
@@ -781,11 +835,29 @@
 <body>
   <div class="page">
 
-    <!-- HERO -->
+    <!-- HERO С ВИДЕО -->
     <section class="hero reveal d1">
       <div class="hero-bg"></div>
       <div class="hero-overlay"></div>
       <div class="hero-inner">
+        
+        <!-- ВИДЕО МАТВЕЯ "РЕКЛАМНЫЕ ВОЗМОЖНОСТИ" -->
+        <div class="hero-video-wrap">
+          <video 
+            class="hero-video"
+            src="https://1tourtv.ru/wp-content/uploads/2025/11/658902673.mp4"
+            controls
+            playsinline
+            preload="metadata"
+            poster="https://1tourtv.ru/wp-content/uploads/2025/08/logo_new-.png"
+          >
+            Ваш браузер не поддерживает видео.
+          </video>
+          <div class="video-hint">
+            🔊 Нажмите ▶️ чтобы услышать Матвея
+          </div>
+        </div>
+
         <div class="hero-top">
           <div class="hero-logo-wrap">
             <img src="https://1tourtv.ru/wp-content/uploads/2025/08/logo_new-.png" alt="Первый туристический">
@@ -865,7 +937,8 @@
         </div>
         <div class="target-card">
           <div class="target-icon">🍴</div>
-          <div class="target-label">Рестораны и кафе</div>
+          <div class="target-label">Рестораны и кафе
+</div>
         </div>
         <div class="target-card">
           <div class="target-icon">🏬</div>
@@ -910,8 +983,7 @@
       <div class="format-grid">
         <div class="format-card">
           <div class="format-image">
-            <img src="https://1tourtv.ru/wp-content/uploads/2025/08
-/photo_2025-08-09_09-40-48.jpg" alt="Ролики в эфире">
+            <img src="https://1tourtv.ru/wp-content/uploads/2025/08/photo_2025-08-09_09-40-48.jpg" alt="Ролики в эфире">
           </div>
           <div class="format-body">
             <div class="format-tagline">Эфир</div>
@@ -1070,6 +1142,20 @@
       }
       window.location.href = '/calculator.html';
     });
+
+    // СКРЫТЬ ПОДСКАЗКУ ПОСЛЕ СТАРТА ВИДЕО
+    const heroVideo = document.querySelector('.hero-video');
+    const videoWrap = document.querySelector('.hero-video-wrap');
+    
+    if (heroVideo && videoWrap) {
+      heroVideo.addEventListener('play', () => {
+        videoWrap.classList.add('playing');
+      });
+      
+      heroVideo.addEventListener('pause', () => {
+        videoWrap.classList.remove('playing');
+      });
+    }
   </script>
 </body>
 </html>
