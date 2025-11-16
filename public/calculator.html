@@ -475,6 +475,71 @@
       color:var(--muted);
     }
 
+    /* === МОДАЛКА С ВИДЕО === */
+    .video-modal{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      animation:fadeIn .3s;
+    }
+    .video-modal.show{
+      display:flex;
+    }
+    .video-modal-overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,.85);
+      backdrop-filter:blur(8px);
+    }
+    .video-modal-content{
+      position:relative;
+      max-width:90%;
+      width:500px;
+      z-index:1;
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+    }
+    .final-video{
+      width:100%;
+      border-radius:20px;
+      box-shadow:0 20px 60px rgba(0,0,0,.6);
+      display:block;
+      background:#000;
+    }
+    .video-status{
+      margin-top:16px;
+      padding:12px 20px;
+      border-radius:999px;
+      background:rgba(255,255,255,.95);
+      backdrop-filter:blur(12px);
+      font-size:13px;
+      font-weight:800;
+      color:var(--text-main);
+      display:flex;
+      align-items:center;
+      gap:8px;
+      box-shadow:0 8px 24px rgba(0,0,0,.3);
+    }
+    .spinner{
+      width:16px;
+      height:16px;
+      border:2px solid var(--brand);
+      border-top-color:transparent;
+      border-radius:50%;
+      animation:spin 0.8s linear infinite;
+    }
+    @keyframes spin{
+      to{transform:rotate(360deg)}
+    }
+    @keyframes fadeIn{
+      from{opacity:0}
+      to{opacity:1}
+    }
+
     .footer-actions{
       position:fixed;
       left:0;
@@ -744,7 +809,8 @@
           <div class="package-header">
             <div>
               <div class="package-name">PRO</div>
-              <div class="package-desc">История "мы здесь надолго": спецпроект под вас.</div>
+              <div class="package-desc">История "мы здесь надолго":
+ спецпроект под вас.</div>
               <div class="package-meta">Индивидуальные сроки • все носители • ~45 минут</div>
             </div>
             <div class="package-price">1 500 000 ₽</div>
@@ -770,6 +836,26 @@
         </div>
       </div>
     </section>
+  </div>
+
+  <!-- МОДАЛКА С ФИНАЛЬНЫМ ВИДЕО -->
+  <div class="video-modal" id="videoModal">
+    <div class="video-modal-overlay"></div>
+    <div class="video-modal-content">
+      <video 
+        id="finalVideo"
+        class="final-video"
+        src="https://1tourtv.ru/wp-content/uploads/2025/11/final.mp4"
+        playsinline
+        preload="auto"
+      >
+        Ваш браузер не поддерживает видео.
+      </video>
+      <div class="video-status" id="videoStatus">
+        <div class="spinner"></div>
+        Отправляем ваш расчёт продюсеру...
+      </div>
+    </div>
   </div>
 
   <div class="footer-actions">
@@ -971,7 +1057,7 @@ document.querySelectorAll('[data-type="package"]').forEach(card=>{
   });
 });
 
-// MainButton — ДУБЛИРОВАННАЯ ОТПРАВКА
+// MainButton — ОТПРАВКА С ВИДЕО
 if (tg){
   tg.MainButton.onClick(async ()=>{
     // БЛОКИРУЕМ КНОПКУ
@@ -984,6 +1070,25 @@ if (tg){
       tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('success'); 
     } catch(e){}
 
+    // ПОКАЗЫВАЕМ МОДАЛКУ С ВИДЕО
+    const modal = document.getElementById('videoModal');
+    const video = document.getElementById('finalVideo');
+    const status = document.getElementById('videoStatus');
+    
+    modal.classList.add('show');
+    
+    // ЗАПУСКАЕМ ВИДЕО СО ЗВУКОМ (клик был!)
+    try {
+      video.muted = false;
+      await video.play();
+      console.log('✅ Видео играет со звуком');
+    } catch (err) {
+      console.warn('⚠️ Автовоспроизведение заблокировано:', err);
+      // Если не сработало — показываем кнопку play
+      video.controls = true;
+    }
+
+    // СОБИРАЕМ ДАННЫЕ
     const payload = {
       type: 'budget_calc',
       package: selected.package ? selected.package.name : null,
@@ -998,15 +1103,7 @@ if (tg){
 
     console.log('📦 Payload:', JSON.stringify(payload));
     
-    // СПОСОБ 1: Telegram sendData (может не работать)
-    try {
-      tg.sendData(JSON.stringify(payload));
-      console.log('✅ Telegram sendData() вызван');
-    } catch(e) {
-      console.warn('⚠️ sendData не сработал:', e);
-    }
-
-    // СПОСОБ 2: HTTP POST на наш сервер (НАДЁЖНЫЙ!)
+    // ОТПРАВЛЯЕМ НА СЕРВЕР
     try {
       const response = await fetch('/api/budget', {
         method: 'POST',
@@ -1020,11 +1117,18 @@ if (tg){
       console.log('✅ HTTP POST успешен:', result);
 
       if (result.success) {
-        // ЗАКРЫВАЕМ ЧЕРЕЗ 500ms
-        setTimeout(() => {
-          console.log('🚪 Закрываем WebApp');
-          tg.close();
-        }, 500);
+        // МЕНЯЕМ СТАТУС
+        status.innerHTML = '✅ Расчёт отправлен продюсеру!';
+        
+        // ЖДЁМ ОКОНЧАНИЯ ВИДЕО (или максимум 15 сек)
+        await Promise.race([
+          new Promise(resolve => video.addEventListener('ended', resolve, { once: true })),
+          new Promise(resolve => setTimeout(resolve, 15000))
+        ]);
+        
+        // ЗАКРЫВАЕМ
+        console.log('🚪 Закрываем WebApp');
+        tg.close();
       } else {
         throw new Error('Server returned error');
       }
@@ -1032,20 +1136,19 @@ if (tg){
     } catch(e) {
       console.error('❌ HTTP POST failed:', e);
       
-      // ПОКАЗЫВАЕМ УВЕДОМЛЕНИЕ
+      // ПОКАЗЫВАЕМ ОШИБКУ
+      status.innerHTML = '⚠️ Ошибка отправки, но расчёт сохранён';
+      
       tg.MainButton.hideProgress();
       tg.MainButton.enable();
       
-      tg.showAlert('✅ Расчёт сохранён! Продюсер скоро свяжется с вами.');
-      
-      // Закрываем через 2 сек
+      // Закрываем через 3 сек
       setTimeout(() => {
         tg.close();
-      }, 2000);
+      }, 3000);
     }
   });
 }
   </script>
 </body>
 </html>
-
