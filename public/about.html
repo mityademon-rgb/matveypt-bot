@@ -1107,7 +1107,7 @@
       window.location.href = '/calculator.html';
     });
 
-    // АВТОПОКАЗ ВИДЕО ПРИ ЗАГРУЗКЕ
+        // АВТОПОКАЗ ВИДЕО ПРИ ЗАГРУЗКЕ
     window.addEventListener('load', () => {
       setTimeout(() => {
         const videoModal = document.getElementById('videoModal');
@@ -1116,6 +1116,13 @@
         const videoOverlay = document.getElementById('videoOverlay');
         
         if (!videoModal || !heroVideo) return;
+        
+        // ЗАКРЫТИЕ МОДАЛКИ
+        function closeVideoModal(){
+          videoModal.classList.remove('show');
+          heroVideo.pause();
+          heroVideo.currentTime = 0;
+        }
         
         // ПОКАЗЫВАЕМ МОДАЛКУ
         videoModal.classList.add('show');
@@ -1133,25 +1140,35 @@
           try{ tg.HapticFeedback && tg.HapticFeedback.impactOccurred('medium'); }catch(e){}
         }
         
-        // ЗАКРЫТИЕ
-        function closeVideoModal(){
-          videoModal.classList.remove('show');
-          heroVideo.pause();
-          heroVideo.currentTime = 0;
-        }
+        // АВТОЗАКРЫТИЕ ПОСЛЕ ОКОНЧАНИЯ ВИДЕО
+        heroVideo.addEventListener('ended', () => {
+          console.log('✅ Видео закончилось, закрываем модалку');
+          closeVideoModal();
+        });
         
-        closeVideo.addEventListener('click', closeVideoModal);
-        videoOverlay.addEventListener('click', closeVideoModal);
+        // ЗАКРЫТИЕ ПО КЛИКУ НА КРЕСТИК
+        closeVideo.addEventListener('click', () => {
+          console.log('🔘 Закрытие по крестику');
+          closeVideoModal();
+        });
         
-        // ESC
+        // ЗАКРЫТИЕ ПО КЛИКУ НА OVERLAY
+        videoOverlay.addEventListener('click', () => {
+          console.log('🔘 Закрытие по клику на overlay');
+          closeVideoModal();
+        });
+        
+        // ЗАКРЫТИЕ ПО ESC
         document.addEventListener('keydown', (e) => {
           if (e.key === 'Escape' && videoModal.classList.contains('show')){
+            console.log('🔘 Закрытие по ESC');
             closeVideoModal();
           }
         });
         
-      }, 600); // 600ms задержка для красоты
+      }, 600); // 600ms задержка
     });
+
   </script>
 </body>
 </html>
