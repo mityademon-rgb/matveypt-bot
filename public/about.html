@@ -88,6 +88,17 @@
       }
     }
 
+    @keyframes fadeIn{
+      from{
+        opacity:0;
+        transform:scale(0.95);
+      }
+      to{
+        opacity:1;
+        transform:scale(1);
+      }
+    }
+
     .reveal{
       opacity:0;
       animation:fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -113,14 +124,13 @@
       border:1px solid rgba(255,255,255,.1);
     }
 
-        .hero-bg{
+    .hero-bg{
       position:absolute;
       inset:0;
       background:url("https://1tourtv.ru/wp-content/uploads/2025/07/image-pricing-2-1.png") center/cover no-repeat;
       opacity:.3;
       filter:grayscale(0);
     }
-
 
     .hero-overlay{
       position:absolute;
@@ -133,50 +143,6 @@
     .hero-inner{
       position:relative;
       padding:32px 24px 24px;
-    }
-
-    /* ВИДЕО В HERO */
-    .hero-video-wrap{
-      position:relative;
-      width:100%;
-      max-width:100%;
-      margin-bottom:20px;
-      border-radius:20px;
-      overflow:hidden;
-      box-shadow:0 12px 32px rgba(0,0,0,.4);
-      border:2px solid rgba(255,255,255,.15);
-      background:#000;
-    }
-
-    .hero-video{
-      width:100%;
-      height:auto;
-      display:block;
-      max-height:400px;
-      object-fit:contain;
-    }
-
-    .video-hint{
-      position:absolute;
-      bottom:12px;
-      left:50%;
-      transform:translateX(-50%);
-      padding:8px 16px;
-      border-radius:999px;
-      background:rgba(0,0,0,.8);
-      backdrop-filter:blur(8px);
-      color:#fff;
-      font-size:12px;
-      font-weight:700;
-      pointer-events:none;
-      opacity:1;
-      transition:opacity .3s;
-      border:1px solid rgba(255,255,255,.2);
-    }
-
-    .hero-video-wrap:hover .video-hint,
-    .hero-video-wrap.playing .video-hint{
-      opacity:0;
     }
 
     .hero-top{
@@ -280,6 +246,70 @@
       font-weight:700;
       color:var(--white);
       line-height:1.3;
+    }
+
+    /* ============ МОДАЛКА С ВИДЕО ============ */
+    .video-modal{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      animation:fadeIn .3s;
+    }
+
+    .video-modal.show{
+      display:flex;
+    }
+
+    .video-modal-overlay{
+      position:absolute;
+      inset:0;
+      background:rgba(0,0,0,.92);
+      backdrop-filter:blur(8px);
+      cursor:pointer;
+    }
+
+    .video-modal-content{
+      position:relative;
+      max-width:90%;
+      width:650px;
+      z-index:1;
+    }
+
+    .video-close{
+      position:absolute;
+      top:-45px;
+      right:0;
+      width:40px;
+      height:40px;
+      border-radius:50%;
+      border:2px solid #fff;
+      background:rgba(0,0,0,.85);
+      color:#fff;
+      font-size:22px;
+      font-weight:700;
+      cursor:pointer;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      transition:all .25s;
+      z-index:10;
+    }
+
+    .video-close:hover{
+      background:var(--brand);
+      border-color:var(--brand);
+      transform:rotate(90deg) scale(1.1);
+    }
+
+    .hero-modal-video{
+      width:100%;
+      border-radius:24px;
+      box-shadow:0 24px 64px rgba(0,0,0,.7);
+      display:block;
+      background:#000;
     }
 
     /* ============ СЕКЦИИ ============ */
@@ -727,16 +757,6 @@
         font-size:22px;
       }
 
-      .hero-video{
-        max-height:300px;
-      }
-
-      .video-hint{
-        font-size:11px;
-        padding:6px 12px;
-        bottom:8px;
-      }
-
       .hero-tiles{
         grid-template-columns:repeat(2, 1fr);
         gap:8px;
@@ -770,34 +790,27 @@
       .btn{
         width:100%;
       }
+
+      .video-modal-content{
+        width:95%;
+      }
+
+      .video-close{
+        top:-55px;
+        width:44px;
+        height:44px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="page">
 
-    <!-- HERO С ВИДЕО -->
+    <!-- HERO -->
     <section class="hero reveal d1">
       <div class="hero-bg"></div>
       <div class="hero-overlay"></div>
       <div class="hero-inner">
-        
-        <!-- ВИДЕО МАТВЕЯ "О КАНАЛЕ" -->
-        <div class="hero-video-wrap">
-          <video 
-            class="hero-video"
-            src="https://1tourtv.ru/wp-content/uploads/2025/11/658771760.mp4"
-            controls
-            playsinline
-            preload="metadata"
-            poster="https://1tourtv.ru/wp-content/uploads/2025/08/logo_new-.png"
-          >
-            Ваш браузер не поддерживает видео.
-          </video>
-          <div class="video-hint">
-            🔊 Нажмите ▶️ чтобы услышать Матвея
-          </div>
-        </div>
 
         <div class="hero-top">
           <div class="hero-logo-wrap">
@@ -902,6 +915,7 @@
       <div class="platform-grid">
         <div class="platform-card">
           <div class="platform-image">
+            <img src="https://1tourtv.ru
             <img src="https://1tourtv.ru/wp-content/uploads/2025/08/photo_2025-08-08_12-10-59.jpg" alt="Прямой эфир">
           </div>
           <div class="platform-body">
@@ -1045,6 +1059,23 @@
 
   </div>
 
+  <!-- МОДАЛКА С ВИДЕО -->
+  <div class="video-modal" id="videoModal">
+    <div class="video-modal-overlay" id="videoOverlay"></div>
+    <div class="video-modal-content">
+      <button class="video-close" id="closeVideo">✕</button>
+      <video 
+        id="heroVideo"
+        class="hero-modal-video"
+        src="https://1tourtv.ru/wp-content/uploads/2025/11/658771760.mp4"
+        playsinline
+        preload="auto"
+      >
+        Ваш браузер не поддерживает видео.
+      </video>
+    </div>
+  </div>
+
   <div class="footer-bar">
     <div class="footer-inner">
       <button type="button" id="backBtn" class="btn btn-secondary">⬅ Назад в Telegram</button>
@@ -1076,20 +1107,51 @@
       window.location.href = '/calculator.html';
     });
 
-    // СКРЫТЬ ПОДСКАЗКУ ПОСЛЕ СТАРТА ВИДЕО
-    const heroVideo = document.querySelector('.hero-video');
-    const videoWrap = document.querySelector('.hero-video-wrap');
-    
-    if (heroVideo && videoWrap) {
-      heroVideo.addEventListener('play', () => {
-        videoWrap.classList.add('playing');
-      });
-      
-      heroVideo.addEventListener('pause', () => {
-        videoWrap.classList.remove('playing');
-      });
-    }
+    // АВТОПОКАЗ ВИДЕО ПРИ ЗАГРУЗКЕ
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const videoModal = document.getElementById('videoModal');
+        const heroVideo = document.getElementById('heroVideo');
+        const closeVideo = document.getElementById('closeVideo');
+        const videoOverlay = document.getElementById('videoOverlay');
+        
+        if (!videoModal || !heroVideo) return;
+        
+        // ПОКАЗЫВАЕМ МОДАЛКУ
+        videoModal.classList.add('show');
+        
+        // ПРОБУЕМ ЗАПУСТИТЬ СО ЗВУКОМ
+        heroVideo.muted = false;
+        heroVideo.play().catch(() => {
+          // Если браузер заблокировал — показываем controls
+          heroVideo.controls = true;
+          console.log('⚠️ Autoplay заблокирован, показываем controls');
+        });
+        
+        // Тактильный отклик
+        if (tg){
+          try{ tg.HapticFeedback && tg.HapticFeedback.impactOccurred('medium'); }catch(e){}
+        }
+        
+        // ЗАКРЫТИЕ
+        function closeVideoModal(){
+          videoModal.classList.remove('show');
+          heroVideo.pause();
+          heroVideo.currentTime = 0;
+        }
+        
+        closeVideo.addEventListener('click', closeVideoModal);
+        videoOverlay.addEventListener('click', closeVideoModal);
+        
+        // ESC
+        document.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && videoModal.classList.contains('show')){
+            closeVideoModal();
+          }
+        });
+        
+      }, 600); // 600ms задержка для красоты
+    });
   </script>
 </body>
 </html>
-
