@@ -44,16 +44,33 @@ function shouldOfferAudioByTriggers(text = '') {
   );
 }
 
-async function sendVisualIfNeeded(chatId, visualKey) {
+async function sendVisualIfNeeded(chatId, visualKey, session = null) {
   if (!visualKey) return;
   const url = VISUALS[visualKey];
   if (!url) return;
+
+  // Анти-спам: не шлём одну и ту же карточку снова и снова
+  if (session) {
+    const lastKey = session.lastVisualKey || null;
+    const lastAt = session.lastVisualAt || 0;
+
+    // если тот же ключ — просто не дублируем
+    if (lastKey === visualKey) return;
+
+    // если картинка уже была недавно — не чаще раза в ~90 секунд
+    if (Date.now() - lastAt < 90_000) return;
+  }
 
   try {
     await bot.sendPhoto(chatId, url, {
       caption: 'Смотрите 👇',
       disable_notification: true
     });
+
+    if (session) {
+      session.lastVisualKey = visualKey;
+      session.lastVisualAt = Date.now();
+    }
   } catch (err) {
     console.error('❌ Ошибка отправки визуала:', err.message);
   }
@@ -123,7 +140,115 @@ app.post('/api/budget', async (req, res) => {
       return res.status(500).json({ success: false, error: 'Manager not configured' });
     }
 
-    let managerMessage = `🔥 НОВЫЙ РАСЧЁТ ИЗ КАЛЬКУЛЯТОРА!\n\n`;
+    
+    // === NEW: partner_calc (новый калькулятор под партнёрство/маршруты) ===
+    const calcType = (data.type || '').toString();
+
+    if (calcType === 'partner_calc') {
+      const biz = data.businessType || null;
+      const city = data.city || null;
+      const goal = data.goal || null;
+      const season = data.season || null;
+      const level = data.level || null;
+
+      const addons = Array.isArray(data.addons) ? data.addons : [];
+      const total = Number(data.total || 0);
+
+      let managerMessage = `🔥 ЗАЯВКА ИЗ КАЛЬКУЛЯТОРА (ПАРТНЁРСТВО)
+
+`;
+
+      if (chatId) {
+        const session = sessions.get(chatId);
+        if (session && session.brief) {
+          managerMessage += `👤 ${session.brief.firstName || 'Не указано'}
+`;
+          managerMessage += `📱 ${session.brief.phone || 'НЕТ'}
+`;
+          managerMessage += `💬 @${session.brief.telegramUsername || 'нет'}
+`;
+        }
+        managerMessage += `🆔 Chat ID: ${chatId}
+
+`;
+      } else {
+        managerMessage += `⚠️ Анонимный расчёт (chatId не передан)
+
+`;
+      }
+
+      managerMessage += `━━━━━━━━━━━━━━━━━━━━
+`;
+      managerMessage += `💰 ИТОГО: ${total.toLocaleString('ru-RU')} ₽
+`;
+      managerMessage += `━━━━━━━━━━━━━━━━━━━━
+
+`;
+
+      managerMessage += `🏢 Формат: ${biz || '—'}
+`;
+      managerMessage += `📍 География: ${city || '—'}
+`;
+      managerMessage += `🎯 Цель: ${goal || '—'}
+`;
+      managerMessage += `🗓️ Сезон: ${season || '—'}
+`;
+      managerMessage += `⭐️ Уровень: ${level || '—'}
+`;
+
+      if (addons.length) {
+        managerMessage += `
+➕ Усиления:
+`;
+        addons.forEach(a => (managerMessage += `   ✓ ${a}
+`));
+      }
+
+      if (data.comment) {
+        managerMessage += `
+📝 Комментарий: ${String(data.comment).substring(0, 500)}
+`;
+      }
+
+      managerMessage += `
+⏰ ${new Date().toLocaleString('ru-RU')}
+`;
+      managerMessage += `
+🔥 ЗВОНИТЬ/ПИСАТЬ СЕЙЧАС — КЛИЕНТ ГОРЯЧИЙ!`;
+
+      const managerKeyboard = chatId
+        ? {
+            inline_keyboard: [
+              [
+                {
+                  text: '💬 Написать клиенту',
+                  url: `tg://user?id=${chatId}`
+                }
+              ],
+              [
+                { text: '✅ Я позвонил', callback_data: `called_${chatId}` },
+                { text: '🎉 Сделка закрыта', callback_data: `closed_${chatId}` }
+              ]
+            ]
+          }
+        : undefined;
+
+      await bot.sendMessage(managerChatId, managerMessage, { reply_markup: managerKeyboard });
+
+      if (chatId) {
+        await bot.sendMessage(
+          chatId,
+          `✅ Принято!
+
+Я передал расчёт продюсеру. Он свяжется с вами и предложит самый удачный заход под вашу задачу.`,
+          { reply_markup: MAIN_KEYBOARD }
+        );
+      }
+
+      return res.json({ success: true, message: 'Partner calculation received' });
+    }
+
+let managerMessage = `🔥 НОВЫЙ РАСЧЁТ ИЗ КАЛЬКУЛЯТОРА!\n\n`;
 
     if (chatId) {
       const session = sessions.get(chatId);
@@ -606,6 +731,35 @@ bot.on('message', async (msg) => {
 
   const text = msg.text;
 
+  // гарантируем сессию даже если пользователь не нажал /start
+  let session = sessions.get(chatId);
+  if (!session) {
+    session = {
+      stage: 'greeting',
+      context: [],
+      brief: {
+        telegramUsername: msg.from?.username || null,
+        firstName: msg.from?.first_name || null,
+        phone: null,
+        email: null,
+        companyName: null,
+        companyBusiness: null,
+        city: null,
+        targetAudience: null,
+        task: null,
+        season: null
+      },
+      calculatorShown: false,
+      contactShared: false,
+      managerCalled: false,
+      managerNotifiedAt: null,
+      lastVisualKey: null,
+      lastVisualAt: 0
+    };
+    sessions.set(chatId, session);
+  }
+
+
   // не трогаем команды и контакт (у них свои обработчики)
   if (text?.startsWith('/') || msg.contact) return;
 
@@ -652,7 +806,7 @@ bot.on('message', async (msg) => {
     );
 
     // опорная картинка “экосистема”
-    await sendVisualIfNeeded(chatId, 'ecosystem');
+    await sendVisualIfNeeded(chatId, 'ecosystem', session);
     return;
   }
 
@@ -678,7 +832,7 @@ bot.on('message', async (msg) => {
       'Смотрите.\nРеклама — это когда вас прерывают.\nА мы делаем так, что вас выбирают.\n\nПредставьте: человек планирует поездку. Он читает подборку маршрутов — и вы там не как баннер, а как логичная часть путешествия.\nВ этот момент вы уже не «вариант», вы — решение.'
     );
 
-    await sendVisualIfNeeded(chatId, 'choice');
+    await sendVisualIfNeeded(chatId, 'choice', session);
     await offerAudioIfNeeded(chatId);
     return;
   }
@@ -706,7 +860,7 @@ bot.on('message', async (msg) => {
   }
 
   // === SESSION ===
-  const session = sessions.get(chatId) || {
+  session = sessions.get(chatId) || {
     stage: 'greeting',
     context: [],
     brief: {
@@ -863,7 +1017,7 @@ bot.on('message', async (msg) => {
     }
 
     // visual as continuation (max 1)
-    await sendVisualIfNeeded(chatId, aiResponse.visualKey);
+    await sendVisualIfNeeded(chatId, aiResponse.visualKey, session);
 
     // calculator suggestion
     if (aiResponse.readyForCalculator === true && !session.calculatorShown) {
