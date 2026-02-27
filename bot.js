@@ -1,7 +1,7 @@
 // bot.js - Главный файл бота
 import dotenv from 'dotenv';
 dotenv.config();
-
+console.log("BOOT MARK:", "MATVEYPT_MAIN_OK__2026_02_27__B");
 import TelegramBot from 'node-telegram-bot-api';
 import express from 'express';
 import { analyzeMessage } from './agent.js';
