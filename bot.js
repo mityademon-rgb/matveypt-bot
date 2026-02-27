@@ -1,7 +1,7 @@
-// bot.js - Главный файл бота (MatveyPT / Showcase Mode)
+// bot.js - Главный файл бота (MatveyPT / Universal Producer + Showcase Menu)
 import dotenv from 'dotenv';
 dotenv.config();
-console.log("BOOT MARK:", "MATVEYPT_MAIN_OK__2026_02_27__SHOWCASE_MENU");
+console.log('BOOT MARK:', 'MATVEYPT_MAIN_OK__2026_02_27__UNIVERSAL_V2');
 
 import TelegramBot from 'node-telegram-bot-api';
 import express from 'express';
@@ -15,7 +15,8 @@ const sessions = new Map();
 
 // === CONFIG ===
 const PUBLIC_BASE_URL = (process.env.PUBLIC_BASE_URL || 'https://matveypt-bot-production.up.railway.app').replace(/\/$/, '');
-const AUDIO_EXPLAIN_URL = process.env.AUDIO_EXPLAIN_URL || null;
+const AUDIO_EXPLAIN_URL =
+  process.env.AUDIO_EXPLAIN_URL || `${PUBLIC_BASE_URL}/showcase/audio_promo.mp3`;
 
 // SHOWCASE VISUALS MAP (ключ -> URL)
 const VISUALS = {
@@ -28,8 +29,62 @@ const VISUALS = {
   levels: `${PUBLIC_BASE_URL}/showcase/07_partnership_levels.jpg`
 };
 
+function nowMs() {
+  return Date.now();
+}
+
+function normText(t = '') {
+  return String(t || '').trim();
+}
+
+function normLower(t = '') {
+  return normText(t).toLowerCase();
+}
+
+function isYes(t = '') {
+  const s = normLower(t);
+  return (
+    s === 'да' ||
+    s === 'ага' ||
+    s === 'угу' ||
+    s === 'понял' ||
+    s === 'поняла' ||
+    s === 'ок' ||
+    s === 'okay' ||
+    s === 'окей' ||
+    s === 'конечно' ||
+    s === 'разобрался' ||
+    s === 'разобралась' ||
+    s === 'понятно'
+  );
+}
+
+function isNo(t = '') {
+  const s = normLower(t);
+  return (
+    s === 'нет' ||
+    s === 'неа' ||
+    s === 'не понял' ||
+    s === 'не поняла' ||
+    s === 'непонятно' ||
+    s === 'не ясно' ||
+    s === 'сложно'
+  );
+}
+
+function isAudioIntent(t = '') {
+  const s = normLower(t);
+  return (
+    s.includes('голос') ||
+    s.includes('аудио') ||
+    s.includes('послуш') ||
+    (s.includes('включи') && s.includes('аудио')) ||
+    s.includes('где аудио')
+  );
+}
+
 function shouldOfferAudioByTriggers(text = '') {
-  const t = (text || '').toLowerCase();
+  const t = normLower(text);
   return (
     t.includes('не понял') ||
     t.includes('не поняла') ||
@@ -44,57 +99,149 @@ function shouldOfferAudioByTriggers(text = '') {
   );
 }
 
+function ensureSession(chatId, msg) {
+  let session = sessions.get(chatId);
+  if (session) return session;
+
+  session = {
+    stage: 'greeting', // greeting | await_contact | await_understanding | await_explain_choice | awaiting_business | chat
+    context: [],
+    brief: {
+      telegramUsername: msg?.from?.username || null,
+      firstName: msg?.from?.first_name || null,
+      phone: null,
+      email: null,
+      companyName: null,
+      companyBusiness: null,
+      city: null,
+      targetAudience: null,
+      task: null,
+      season: null
+    },
+    calculatorShown: false,
+    contactShared: false,
+
+    // anti-repeat
+    lastUserText: null,
+    lastUserAt: 0,
+    lastUserMsgId: 0,
+    lastBotText: null,
+    lastBotAt: 0,
+
+    // visuals
+    lastVisualKey: null,
+    lastVisualAt: 0
+  };
+
+  sessions.set(chatId, session);
+  return session;
+}
+
+function deRepeatOpener(message, session) {
+  const text = normText(message);
+  if (!text) return text;
+
+  const prev = normText(session?.lastBotText || '');
+  const prevStart = prev.slice(0, 80).toLowerCase();
+  const curStart = text.slice(0, 80).toLowerCase();
+
+  if (curStart.startsWith('смотрите') && prevStart.startsWith('смотрите')) {
+    return text.replace(/^Смотрите\s*,?\s*/i, 'Кстати, ');
+  }
+
+  if (prev && text === prev) {
+    return 'Понял. Давайте без повтора — уточню один момент: где вы и на какой сезон хотите усилиться?';
+  }
+
+  return text;
+}
+
 async function sendVisualIfNeeded(chatId, visualKey, session = null) {
   if (!visualKey) return;
   const url = VISUALS[visualKey];
   if (!url) return;
 
-  // Анти-спам: не шлём одну и ту же карточку снова и снова
   if (session) {
     const lastKey = session.lastVisualKey || null;
     const lastAt = session.lastVisualAt || 0;
 
-    // если тот же ключ — просто не дублируем
     if (lastKey === visualKey) return;
-
-    // если картинка уже была недавно — не чаще раза в ~90 секунд
-    if (Date.now() - lastAt < 90_000) return;
+    if (nowMs() - lastAt < 90_000) return;
   }
 
   try {
     await bot.sendPhoto(chatId, url, {
-      caption: 'Смотрите 👇',
+      caption: 'Визуально 👇',
       disable_notification: true
     });
 
     if (session) {
       session.lastVisualKey = visualKey;
-      session.lastVisualAt = Date.now();
+      session.lastVisualAt = nowMs();
     }
   } catch (err) {
     console.error('❌ Ошибка отправки визуала:', err.message);
   }
 }
 
-async function offerAudioIfNeeded(chatId) {
-  if (!AUDIO_EXPLAIN_URL) {
-    await bot.sendMessage(
-      chatId,
-      'Если удобнее — могу объяснить голосом (короткое аудио на 2–3 минуты). Скажете “голосом” — включу.'
-    );
-    return;
+async function sendAudioExplain(chatId) {
+  try {
+    await bot.sendAudio(chatId, AUDIO_EXPLAIN_URL, {
+      caption:
+        '🎧 2 минуты — “как это работает”.\n\nПосле прослушивания напишите: вы — маршрут/объект/отель/бренд/сервис и где вы географически.'
+    });
+  } catch (e) {
+    await bot.sendMessage(chatId, `🎧 Не смог отправить файлом. Вот ссылка: ${AUDIO_EXPLAIN_URL}`);
   }
+}
 
+async function askUnderstanding(chatId) {
   const keyboard = {
-    inline_keyboard: [[{ text: '▶️ Послушать объяснение', url: AUDIO_EXPLAIN_URL }]]
+    keyboard: [[{ text: '✅ Да, понял(а)' }, { text: '❌ Нет, поясните' }], [{ text: '↩️ В меню' }]],
+    resize_keyboard: true,
+    one_time_keyboard: true
   };
 
-  await bot.sendMessage(chatId, 'Если удобнее — можно послушать короткое объяснение (2–3 минуты).', {
+  await bot.sendMessage(chatId, 'Вы разобрались, как мы работаем? (да/нет)', { reply_markup: keyboard });
+}
+
+async function askExplainChoice(chatId) {
+  const keyboard = {
+    keyboard: [
+      [{ text: '🎧 Послушаю 2 минуты' }, { text: '📝 В двух словах' }],
+      [{ text: '↩️ В меню' }]
+    ],
+    resize_keyboard: true,
+    one_time_keyboard: true
+  };
+
+  await bot.sendMessage(chatId, 'Ок. Что удобнее: короткий фрагмент (2 мин) или объясню в двух словах?', {
     reply_markup: keyboard
   });
 }
 
-// === NEW MAIN KEYBOARD (без слова “реклама”) ===
+async function explainInTwoWords(chatId) {
+  await bot.sendMessage(
+    chatId,
+    'Мы не “покупаем внимание”. Мы попадаем в момент выбора: маршруты, подборки, истории. Партнёр там выглядит как естественное решение — поэтому ему доверяют и к нему приходят.'
+  );
+}
+
+async function askBusinessType(chatId) {
+  const keyboard = {
+    keyboard: [
+      [{ text: '🏨 Отель/курорт' }, { text: '📍 Объект/активность' }],
+      [{ text: '🗺️ Регион/город' }, { text: '🏷️ Бренд/сервис' }],
+      [{ text: '↩️ В меню' }]
+    ],
+    resize_keyboard: true,
+    one_time_keyboard: true
+  };
+
+  await bot.sendMessage(chatId, 'Ок, теперь по делу: вы кто по формату?', { reply_markup: keyboard });
+}
+
+// === MAIN KEYBOARD ===
 const MAIN_KEYBOARD = {
   keyboard: [
     [{ text: '🧭 Стать партнёром маршрутов' }, { text: '📺 О портале PTK' }],
@@ -110,11 +257,8 @@ const MAIN_KEYBOARD = {
 app.use(express.static('public'));
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('✅ MatveyPT Bot is running!');
-});
+app.get('/', (req, res) => res.send('✅ MatveyPT Bot is running!'));
 
-// Calculator helper endpoint (если используете)
 app.post('/api/calculate', (req, res) => {
   const { intent, platforms, duration } = req.body;
   const packages = calculatePackages(intent, {
@@ -140,91 +284,58 @@ app.post('/api/budget', async (req, res) => {
       return res.status(500).json({ success: false, error: 'Manager not configured' });
     }
 
-    
-    // === NEW: partner_calc (новый калькулятор под партнёрство/маршруты) ===
-    const calcType = (data.type || '').toString();
+    const calcType = String(data.type || '');
 
+    // === partner_calc ===
     if (calcType === 'partner_calc') {
       const biz = data.businessType || null;
       const city = data.city || null;
       const goal = data.goal || null;
       const season = data.season || null;
       const level = data.level || null;
-
       const addons = Array.isArray(data.addons) ? data.addons : [];
       const total = Number(data.total || 0);
 
-      let managerMessage = `🔥 ЗАЯВКА ИЗ КАЛЬКУЛЯТОРА (ПАРТНЁРСТВО)
-
-`;
+      let managerMessage = `🔥 ЗАЯВКА ИЗ КАЛЬКУЛЯТОРА (ПАРТНЁРСТВО)\n\n`;
 
       if (chatId) {
         const session = sessions.get(chatId);
         if (session && session.brief) {
-          managerMessage += `👤 ${session.brief.firstName || 'Не указано'}
-`;
-          managerMessage += `📱 ${session.brief.phone || 'НЕТ'}
-`;
-          managerMessage += `💬 @${session.brief.telegramUsername || 'нет'}
-`;
+          managerMessage += `👤 ${session.brief.firstName || 'Не указано'}\n`;
+          managerMessage += `📱 ${session.brief.phone || 'НЕТ'}\n`;
+          managerMessage += `💬 @${session.brief.telegramUsername || 'нет'}\n`;
         }
-        managerMessage += `🆔 Chat ID: ${chatId}
-
-`;
+        managerMessage += `🆔 Chat ID: ${chatId}\n\n`;
       } else {
-        managerMessage += `⚠️ Анонимный расчёт (chatId не передан)
-
-`;
+        managerMessage += `⚠️ Анонимный расчёт (chatId не передан)\n\n`;
       }
 
-      managerMessage += `━━━━━━━━━━━━━━━━━━━━
-`;
-      managerMessage += `💰 ИТОГО: ${total.toLocaleString('ru-RU')} ₽
-`;
-      managerMessage += `━━━━━━━━━━━━━━━━━━━━
+      managerMessage += `━━━━━━━━━━━━━━━━━━━━\n`;
+      managerMessage += `💰 ИТОГО: ${total.toLocaleString('ru-RU')} ₽\n`;
+      managerMessage += `━━━━━━━━━━━━━━━━━━━━\n\n`;
 
-`;
-
-      managerMessage += `🏢 Формат: ${biz || '—'}
-`;
-      managerMessage += `📍 География: ${city || '—'}
-`;
-      managerMessage += `🎯 Цель: ${goal || '—'}
-`;
-      managerMessage += `🗓️ Сезон: ${season || '—'}
-`;
-      managerMessage += `⭐️ Уровень: ${level || '—'}
-`;
+      managerMessage += `🏢 Формат: ${biz || '—'}\n`;
+      managerMessage += `📍 География: ${city || '—'}\n`;
+      managerMessage += `🎯 Цель: ${goal || '—'}\n`;
+      managerMessage += `🗓️ Сезон: ${season || '—'}\n`;
+      managerMessage += `⭐️ Уровень: ${level || '—'}\n`;
 
       if (addons.length) {
-        managerMessage += `
-➕ Усиления:
-`;
-        addons.forEach(a => (managerMessage += `   ✓ ${a}
-`));
+        managerMessage += `\n➕ Усиления:\n`;
+        addons.forEach(a => (managerMessage += `   ✓ ${a}\n`));
       }
 
       if (data.comment) {
-        managerMessage += `
-📝 Комментарий: ${String(data.comment).substring(0, 500)}
-`;
+        managerMessage += `\n📝 Комментарий: ${String(data.comment).substring(0, 500)}\n`;
       }
 
-      managerMessage += `
-⏰ ${new Date().toLocaleString('ru-RU')}
-`;
-      managerMessage += `
-🔥 ЗВОНИТЬ/ПИСАТЬ СЕЙЧАС — КЛИЕНТ ГОРЯЧИЙ!`;
+      managerMessage += `\n⏰ ${new Date().toLocaleString('ru-RU')}\n`;
+      managerMessage += `\n🔥 ЗВОНИТЬ/ПИСАТЬ СЕЙЧАС — КЛИЕНТ ГОРЯЧИЙ!`;
 
       const managerKeyboard = chatId
         ? {
             inline_keyboard: [
-              [
-                {
-                  text: '💬 Написать клиенту',
-                  url: `tg://user?id=${chatId}`
-                }
-              ],
+              [{ text: '💬 Написать клиенту', url: `tg://user?id=${chatId}` }],
               [
                 { text: '✅ Я позвонил', callback_data: `called_${chatId}` },
                 { text: '🎉 Сделка закрыта', callback_data: `closed_${chatId}` }
@@ -238,9 +349,7 @@ app.post('/api/budget', async (req, res) => {
       if (chatId) {
         await bot.sendMessage(
           chatId,
-          `✅ Принято!
-
-Я передал расчёт продюсеру. Он свяжется с вами и предложит самый удачный заход под вашу задачу.`,
+          '✅ Принято! Я передал расчёт продюсеру. Он свяжется с вами и предложит лучший заход под задачу.',
           { reply_markup: MAIN_KEYBOARD }
         );
       }
@@ -248,7 +357,8 @@ app.post('/api/budget', async (req, res) => {
       return res.json({ success: true, message: 'Partner calculation received' });
     }
 
-let managerMessage = `🔥 НОВЫЙ РАСЧЁТ ИЗ КАЛЬКУЛЯТОРА!\n\n`;
+    // === legacy калькулятор ===
+    let managerMessage = `🔥 НОВЫЙ РАСЧЁТ ИЗ КАЛЬКУЛЯТОРА!\n\n`;
 
     if (chatId) {
       const session = sessions.get(chatId);
@@ -268,34 +378,24 @@ let managerMessage = `🔥 НОВЫЙ РАСЧЁТ ИЗ КАЛЬКУЛЯТОРА
 
     if (data.production && data.production.length > 0) {
       managerMessage += `🎬 Производство (${Number(data.productionPrice || 0).toLocaleString('ru-RU')} ₽):\n`;
-      data.production.forEach(item => {
-        managerMessage += `   ✓ ${item}\n`;
-      });
+      data.production.forEach(item => (managerMessage += `   • ${item}\n`));
       managerMessage += `\n`;
     }
 
     if (data.blogger) {
-      managerMessage += `👤 Блогер: ${data.blogger}\n`;
-      managerMessage += `💵 ${Number(data.bloggerPrice || 0).toLocaleString('ru-RU')} ₽\n\n`;
+      managerMessage += `📣 Блогер (${Number(data.bloggerPrice || 0).toLocaleString('ru-RU')} ₽): ${data.blogger}\n\n`;
     }
 
     if (data.package) {
-      managerMessage += `📺 Пакет: ${data.package}\n`;
-      managerMessage += `💵 ${Number(data.packagePrice || 0).toLocaleString('ru-RU')} ₽\n\n`;
+      managerMessage += `📦 Пакет: ${data.package} (${Number(data.packagePrice || 0).toLocaleString('ru-RU')} ₽)\n\n`;
     }
 
-    managerMessage += `⏰ ${new Date().toLocaleString('ru-RU')}\n\n`;
-    managerMessage += `🔥 ЗВОНИТЬ СРОЧНО — КЛИЕНТ ГОРЯЧИЙ!`;
+    managerMessage += `⏰ ${new Date().toLocaleString('ru-RU')}`;
 
     const managerKeyboard = chatId
       ? {
           inline_keyboard: [
-            [
-              {
-                text: '💬 Написать клиенту',
-                url: `tg://user?id=${chatId}`
-              }
-            ],
+            [{ text: '💬 Написать клиенту', url: `tg://user?id=${chatId}` }],
             [
               { text: '✅ Я позвонил', callback_data: `called_${chatId}` },
               { text: '🎉 Сделка закрыта', callback_data: `closed_${chatId}` }
@@ -307,239 +407,46 @@ let managerMessage = `🔥 НОВЫЙ РАСЧЁТ ИЗ КАЛЬКУЛЯТОРА
     await bot.sendMessage(managerChatId, managerMessage, { reply_markup: managerKeyboard });
 
     if (chatId) {
-      let clientMessage = `✅ Ваш расчёт получен!\n\n💰 ИТОГО: ${Number(data.total || 0).toLocaleString('ru-RU')} ₽\n\n`;
-
-      if (data.production && data.production.length > 0) {
-        clientMessage += `🎬 Производство (${Number(data.productionPrice || 0).toLocaleString('ru-RU')} ₽):\n`;
-        data.production.forEach(item => {
-          clientMessage += `   • ${item}\n`;
-        });
-        clientMessage += `\n`;
-      }
-
-      if (data.blogger) {
-        clientMessage += `👤 Блогер: ${data.blogger} (${Number(data.bloggerPrice || 0).toLocaleString('ru-RU')} ₽)\n\n`;
-      }
-
-      if (data.package) {
-        clientMessage += `📺 Пакет: ${data.package} (${Number(data.packagePrice || 0).toLocaleString('ru-RU')} ₽)\n\n`;
-      }
-
-      clientMessage += `Продюсер скоро свяжется с вами.`;
-
-      await bot.sendMessage(chatId, clientMessage, { reply_markup: MAIN_KEYBOARD });
+      await bot.sendMessage(chatId, '✅ Принято! Я передал расчёт продюсеру.', { reply_markup: MAIN_KEYBOARD });
     }
 
-    res.json({ success: true, message: 'Budget calculation received' });
+    return res.json({ success: true });
   } catch (err) {
-    console.error('❌ Ошибка обработки POST /api/budget:', err);
-    res.status(500).json({ success: false, error: err.message });
+    console.error('❌ Ошибка /api/budget:', err.message);
+    return res.status(500).json({ success: false });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 Server on port ${PORT}`);
-});
-
-// === MANAGER REMINDER ===
-async function sendReminderToManager(chatId, brief) {
-  const managerChatId = process.env.MANAGER_CHAT_ID;
-  if (!managerChatId) return;
-
-  const reminderMessage =
-    `⏰ НАПОМИНАНИЕ!\n\n` +
-    `Клиент ${brief.firstName || 'без имени'} открыл калькулятор 15 минут назад.\n\n` +
-    `📱 Телефон: ${brief.phone || 'НЕТ'}\n` +
-    `💬 Telegram: @${brief.telegramUsername || 'нет'}\n\n` +
-    `⚠️ КЛИЕНТ МОЖЕТ ОСТЫТЬ — ЗВОНИТЕ!\n\n` +
-    `Время: ${new Date().toLocaleTimeString('ru-RU')}`;
-
-  try {
-    await bot.sendMessage(managerChatId, reminderMessage);
-    console.log(`⏰ Напоминание отправлено (chatId: ${chatId})`);
-  } catch (err) {
-    console.error('❌ Ошибка напоминания:', err.message);
-  }
-}
-
-// === WEB_APP_DATA handler (калькулятор внутри Telegram WebApp) ===
-async function handleWebAppData(msg) {
-  const chatId = msg.chat.id;
-
-  console.log('🎯 WEB_APP_DATA получен!');
-  console.log('Raw data:', msg.web_app_data);
-
-  try {
-    const data = JSON.parse(msg.web_app_data.data);
-    console.log('📊 Данные распарсены:', data);
-
-    const session = sessions.get(chatId);
-    const brief =
-      session?.brief || {
-        firstName: msg.from.first_name,
-        telegramUsername: msg.from.username,
-        phone: null
-      };
-
-    let clientMessage = `✅ Ваш расчёт получен!\n\n💰 ИТОГО: ${Number(data.total || 0).toLocaleString('ru-RU')} ₽\n\n`;
-
-    if (data.production && data.production.length > 0) {
-      clientMessage += `🎬 Производство (${Number(data.productionPrice || 0).toLocaleString('ru-RU')} ₽):\n`;
-      data.production.forEach(item => {
-        clientMessage += `   • ${item}\n`;
-      });
-      clientMessage += `\n`;
-    }
-
-    if (data.blogger) {
-      clientMessage += `👤 Блогер: ${data.blogger} (${Number(data.bloggerPrice || 0).toLocaleString('ru-RU')} ₽)\n\n`;
-    }
-
-    if (data.package) {
-      clientMessage += `📺 Пакет: ${data.package} (${Number(data.packagePrice || 0).toLocaleString('ru-RU')} ₽)\n\n`;
-    }
-
-    clientMessage += `Продюсер скоро свяжется с вами.`;
-
-    await bot.sendMessage(chatId, clientMessage, { reply_markup: MAIN_KEYBOARD });
-
-    // notify manager
-    const managerChatId = process.env.MANAGER_CHAT_ID;
-    if (managerChatId) {
-      let managerMessage = `🔥 НОВЫЙ РАСЧЁТ ИЗ КАЛЬКУЛЯТОРА!\n\n`;
-      managerMessage += `👤 ${brief.firstName || 'Не указано'}\n`;
-      managerMessage += `📱 ${brief.phone || 'НЕТ'}\n`;
-      managerMessage += `💬 @${brief.telegramUsername || 'нет'}\n`;
-      managerMessage += `🆔 Chat ID: ${chatId}\n\n`;
-
-      managerMessage += `━━━━━━━━━━━━━━━━━━━━\n`;
-      managerMessage += `💰 ИТОГО: ${Number(data.total || 0).toLocaleString('ru-RU')} ₽\n`;
-      managerMessage += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-
-      if (data.production && data.production.length > 0) {
-        managerMessage += `🎬 Производство (${Number(data.productionPrice || 0).toLocaleString('ru-RU')} ₽):\n`;
-        data.production.forEach(item => {
-          managerMessage += `   ✓ ${item}\n`;
-        });
-        managerMessage += `\n`;
-      }
-
-      if (data.blogger) {
-        managerMessage += `👤 Блогер: ${data.blogger}\n`;
-        managerMessage += `💵 ${Number(data.bloggerPrice || 0).toLocaleString('ru-RU')} ₽\n\n`;
-      }
-
-      if (data.package) {
-        managerMessage += `📺 Пакет: ${data.package}\n`;
-        managerMessage += `💵 ${Number(data.packagePrice || 0).toLocaleString('ru-RU')} ₽\n\n`;
-      }
-
-      managerMessage += `⏰ ${new Date().toLocaleString('ru-RU')}\n\n`;
-      managerMessage += `🔥 ЗВОНИТЬ СРОЧНО — КЛИЕНТ ГОРЯЧИЙ!`;
-
-      const managerKeyboard = {
-        inline_keyboard: [
-          [
-            {
-              text: '💬 Написать клиенту',
-              url: brief.telegramUsername ? `https://t.me/${brief.telegramUsername}` : `tg://user?id=${chatId}`
-            }
-          ],
-          [
-            { text: '✅ Я позвонил', callback_data: `called_${chatId}` },
-            { text: '🎉 Сделка закрыта', callback_data: `closed_${chatId}` }
-          ]
-        ]
-      };
-
-      await bot.sendMessage(managerChatId, managerMessage, { reply_markup: managerKeyboard });
-    }
-
-    // update session
-    if (session) {
-      session.calculatorShown = true;
-      session.brief.lastCalculation = {
-        total: data.total,
-        package: data.package,
-        production: data.production,
-        blogger: data.blogger,
-        timestamp: Date.now()
-      };
-      sessions.set(chatId, session);
-    }
-  } catch (err) {
-    console.error('❌ Ошибка обработки web_app_data:', err);
-    await bot.sendMessage(chatId, '😅 Ошибка обработки. Попробуйте ещё раз или напишите продюсеру напрямую.', {
-      reply_markup: MAIN_KEYBOARD
-    });
-  }
-}
-
-// === COMMANDS ===
+// === START ===
 bot.onText(/\/start/, async (msg) => {
   const chatId = msg.chat.id;
+  const session = ensureSession(chatId, msg);
 
-  sessions.set(chatId, {
-    stage: 'greeting',
-    context: [],
-    brief: {
-      telegramUsername: msg.from.username || null,
-      firstName: msg.from.first_name || null,
-      phone: null,
-      email: null,
-      companyName: null,
-      companyBusiness: null,
-      city: null,
-      targetAudience: null,
-      task: null,
-      format: null,
-      creative: null,
-      placement: null,
-      executor: null,
-      goal: null,
-      season: null
-    },
-    calculatorShown: false,
-    contactShared: false,
-    managerCalled: false,
-    managerNotifiedAt: null
+  session.stage = 'await_contact';
+  session.context = [];
+  session.contactShared = false;
+
+  sessions.set(chatId, session);
+
+  await bot.sendMessage(chatId, 'Привет! 👋 Я Матвей — продюсер маршрутов “Первого туристического”.', {
+    reply_markup: MAIN_KEYBOARD
   });
 
-  // Видео-приветствие (если ссылка живёт — оставляем)
-  try {
-    await bot.sendVideo(chatId, 'https://1tourtv.ru/wp-content/uploads/2025/11/658563002.mp4', {
-      caption: `Привет! 👋 Я Матвей — продюсер маршрутов “Первого туристического”.`,
-      reply_markup: MAIN_KEYBOARD,
-      supports_streaming: true
-    });
-  } catch (err) {
-    console.error('❌ Ошибка отправки видео:', err.message);
-    await bot.sendMessage(chatId, `Привет! 👋 Я Матвей — продюсер маршрутов “Первого туристического”.`, {
-      reply_markup: MAIN_KEYBOARD
-    });
-  }
-
-  await new Promise(resolve => setTimeout(resolve, 1200));
-
-  const greeting =
-    `Я не про “размещение”. Я про момент, когда человека уже тянет в поездку — и он выбирает.\n\n` +
-    `Чтобы не потеряться: как вас зовут? И оставьте контакт 👇`;
+  await new Promise(resolve => setTimeout(resolve, 700));
 
   const contactKeyboard = {
     keyboard: [
       [{ text: '📱 Поделиться контактом', request_contact: true }],
       [{ text: '✍️ Написать вручную' }],
-      [{ text: '🧭 Стать партнёром маршрутов' }, { text: '📺 О портале PTK' }],
-      [{ text: '🧮 Посчитать роль и бюджет' }],
-      [{ text: '🎬 Как это работает (2 минуты)' }],
-      [{ text: '📞 Передать контакт продюсеру' }]
+      [{ text: '↩️ В меню' }]
     ],
     resize_keyboard: true,
     one_time_keyboard: false
   };
 
-  await bot.sendMessage(chatId, greeting, { reply_markup: contactKeyboard });
+  await bot.sendMessage(chatId, 'Чтобы говорить по делу и не потеряться: как вас зовут и оставьте контакт 👇', {
+    reply_markup: contactKeyboard
+  });
 });
 
 bot.onText(/\/menu/, async (msg) => {
@@ -550,104 +457,24 @@ bot.onText(/\/myid/, async (msg) => {
   await bot.sendMessage(msg.chat.id, `Ваш Chat ID: ${msg.chat.id}`, { reply_markup: MAIN_KEYBOARD });
 });
 
-bot.onText(/\/test/, async (msg) => {
-  const chatId = msg.chat.id;
-  const managerChatId = process.env.MANAGER_CHAT_ID;
-
-  await bot.sendMessage(
-    chatId,
-    `🧪 Проверяю настройки...\n\nТвой Chat ID: ${chatId}\nMANAGER_CHAT_ID: ${managerChatId || 'НЕ НАСТРОЕН'}\nPUBLIC_BASE_URL: ${PUBLIC_BASE_URL}\nAUDIO_EXPLAIN_URL: ${AUDIO_EXPLAIN_URL || 'не задан'}\n\nОтправляю тестовое уведомление...`,
-    { reply_markup: MAIN_KEYBOARD }
-  );
-
-  if (!managerChatId) {
-    await bot.sendMessage(chatId, '❌ MANAGER_CHAT_ID не настроен', { reply_markup: MAIN_KEYBOARD });
-    return;
-  }
-
-  const testMessage =
-    `🧪 ТЕСТОВОЕ УВЕДОМЛЕНИЕ\n\n` +
-    `От: ${msg.from.first_name}\nChat ID: ${chatId}\nTelegram: @${msg.from.username || 'нет'}\n\n` +
-    `Если видишь это — работает! ✅\n\n` +
-    `Время: ${new Date().toLocaleTimeString('ru-RU')}`;
-
-  try {
-    await bot.sendMessage(managerChatId, testMessage);
-    await bot.sendMessage(chatId, `✅ Отправлено на ${managerChatId}`, { reply_markup: MAIN_KEYBOARD });
-  } catch (err) {
-    await bot.sendMessage(chatId, `❌ Ошибка: ${err.message}`, { reply_markup: MAIN_KEYBOARD });
-  }
-});
-
-bot.onText(/\/clients/, async (msg) => {
-  const chatId = msg.chat.id;
-
-  if (chatId.toString() !== process.env.MANAGER_CHAT_ID) {
-    await bot.sendMessage(chatId, '❌ Команда только для менеджера', { reply_markup: MAIN_KEYBOARD });
-    return;
-  }
-
-  if (sessions.size === 0) {
-    await bot.sendMessage(chatId, '📭 Нет активных сессий');
-    return;
-  }
-
-  let clientsList = `👥 АКТИВНЫЕ КЛИЕНТЫ: ${sessions.size}\n\n`;
-
-  sessions.forEach((session, clientChatId) => {
-    const brief = session.brief;
-    clientsList +=
-      `━━━━━━━━━━━━━━━━━━━━\n` +
-      `👤 ${brief.firstName || 'Без имени'}\n` +
-      `📱 ${brief.phone || '❌ нет'}\n` +
-      `💬 @${brief.telegramUsername || 'нет'}\n` +
-      `🏢 ${brief.companyName || '?'}\n` +
-      `🎯 ${brief.task || '?'}\n` +
-      `🧮 Калькулятор: ${session.calculatorShown ? '✅' : '❌'}\n\n`;
-  });
-
-  await bot.sendMessage(chatId, clientsList);
-});
-
-bot.onText(/\/brief/, async (msg) => {
-  const chatId = msg.chat.id;
-  const session = sessions.get(chatId);
-
-  if (!session) {
-    await bot.sendMessage(chatId, '❌ Сессия не найдена. Напишите /start', { reply_markup: MAIN_KEYBOARD });
-    return;
-  }
-
-  const brief = session.brief;
-  const briefText =
-    `📋 ВАШ БРИФ:\n\n` +
-    `Контакты:\n👤 ${brief.firstName || 'не указано'}\n📱 ${brief.phone || 'не указан'}\n💬 @${brief.telegramUsername || 'нет'}\n\n` +
-    `Компания:\n🏢 ${brief.companyName || 'не указано'}\n💼 ${brief.companyBusiness || 'не указано'}\n📍 ${brief.city || 'не указано'}\n\n` +
-    `Проект:\n🎯 ${brief.task || 'не определена'}\n🗓️ ${brief.season || 'не определено'}\n🎬 ${brief.format || 'не определен'}\n👥 ${brief.targetAudience || 'не определена'}\n💡 ${brief.creative || 'не обсуждался'}\n📺 ${brief.placement || 'не определено'}\n\n` +
-    `Статус:\n🧮 Калькулятор: ${session.calculatorShown ? '✅' : '❌'}\n📞 Менеджер звонил: ${session.managerCalled ? '✅' : '❌'}`;
-
-  await bot.sendMessage(chatId, briefText, { reply_markup: MAIN_KEYBOARD });
-});
-
 // === CONTACT SHARE ===
 bot.on('contact', async (msg) => {
   const chatId = msg.chat.id;
   const contact = msg.contact;
 
-  const session = sessions.get(chatId);
-  if (!session) return;
+  const session = ensureSession(chatId, msg);
 
   session.brief.phone = contact.phone_number;
   session.brief.firstName = contact.first_name;
   session.brief.telegramUsername = msg.from.username || null;
   session.contactShared = true;
+
+  session.stage = 'await_understanding';
   sessions.set(chatId, session);
 
-  await bot.sendMessage(chatId, `Отлично! Записал ✅`, { reply_markup: MAIN_KEYBOARD });
-  await new Promise(resolve => setTimeout(resolve, 800));
-  await bot.sendMessage(chatId, `Теперь по-взрослому: вы кто по формату — отель/объект/регион/сервис?`, {
-    reply_markup: MAIN_KEYBOARD
-  });
+  await bot.sendMessage(chatId, 'Отлично! Записал ✅', { reply_markup: MAIN_KEYBOARD });
+  await new Promise(resolve => setTimeout(resolve, 600));
+  await askUnderstanding(chatId);
 
   const managerChatId = process.env.MANAGER_CHAT_ID;
   if (managerChatId) {
@@ -661,36 +488,30 @@ bot.on('contact', async (msg) => {
     try {
       await bot.sendMessage(managerChatId, notif);
     } catch (err) {
-      console.error('Failed to notify manager:', err);
+      console.error('Failed to notify manager:', err.message);
     }
   }
 });
 
-// === CALLBACKS ===
+// === CALLBACKS (менеджер) ===
 bot.on('callback_query', async (query) => {
   const data = query.data;
 
   if (data.startsWith('called_')) {
-    const clientChatId = data.replace('called_', '');
-    const session = sessions.get(Number(clientChatId));
+    const clientChatId = Number(data.replace('called_', ''));
+    const session = sessions.get(clientChatId);
 
     if (session) {
-      session.managerCalled = true;
-      sessions.set(Number(clientChatId), session);
       await bot.answerCallbackQuery(query.id, { text: '✅ Отмечено!' });
-
       try {
-        await bot.editMessageText(query.message.text + '\n\n✅ МЕНЕДЖЕР ПОЗВОНИЛ\n⏰ ' + new Date().toLocaleTimeString('ru-RU'), {
-          chat_id: query.message.chat.id,
-          message_id: query.message.message_id
-        });
+        await bot.editMessageText(
+          query.message.text + `\n\n✅ МЕНЕДЖЕР ПОЗВОНИЛ\n⏰ ${new Date().toLocaleTimeString('ru-RU')}`,
+          { chat_id: query.message.chat.id, message_id: query.message.message_id }
+        );
       } catch (err) {
         console.error('Ошибка редактирования:', err.message);
       }
-
-      await bot.sendMessage(Number(clientChatId), `Наш продюсер скоро свяжется с вами 😊`, {
-        reply_markup: MAIN_KEYBOARD
-      });
+      await bot.sendMessage(clientChatId, 'Наш продюсер скоро свяжется с вами 😊', { reply_markup: MAIN_KEYBOARD });
     } else {
       await bot.answerCallbackQuery(query.id, { text: '❌ Сессия не найдена' });
     }
@@ -698,27 +519,36 @@ bot.on('callback_query', async (query) => {
   }
 
   if (data.startsWith('closed_')) {
-    const clientChatId = data.replace('closed_', '');
-    const session = sessions.get(Number(clientChatId));
-
-    if (session) {
-      sessions.delete(Number(clientChatId));
-      await bot.answerCallbackQuery(query.id, { text: '🎉 Сделка закрыта!' });
-
-      try {
-        await bot.editMessageText(query.message.text + '\n\n🎉 СДЕЛКА ЗАКРЫТА!\n⏰ ' + new Date().toLocaleTimeString('ru-RU'), {
-          chat_id: query.message.chat.id,
-          message_id: query.message.message_id
-        });
-      } catch (err) {
-        console.error('Ошибка редактирования:', err.message);
-      }
-    } else {
-      await bot.answerCallbackQuery(query.id, { text: '❌ Сессия не найдена' });
+    const clientChatId = Number(data.replace('closed_', ''));
+    if (sessions.has(clientChatId)) sessions.delete(clientChatId);
+    await bot.answerCallbackQuery(query.id, { text: '🎉 Сделка закрыта!' });
+    try {
+      await bot.editMessageText(
+        query.message.text + `\n\n🎉 СДЕЛКА ЗАКРЫТА!\n⏰ ${new Date().toLocaleTimeString('ru-RU')}`,
+        { chat_id: query.message.chat.id, message_id: query.message.message_id }
+      );
+    } catch (err) {
+      console.error('Ошибка редактирования:', err.message);
     }
     return;
   }
+
+  await bot.answerCallbackQuery(query.id);
 });
+
+// === WEBAPP DATA HANDLER ===
+async function handleWebAppData(msg) {
+  const chatId = msg.chat.id;
+  ensureSession(chatId, msg);
+
+  try {
+    const data = JSON.parse(msg.web_app_data.data || '{}');
+    console.log('📦 web_app_data:', data);
+    await bot.sendMessage(chatId, '✅ Принял данные из калькулятора.', { reply_markup: MAIN_KEYBOARD });
+  } catch (err) {
+    console.error('❌ web_app_data parse error:', err.message);
+  }
+}
 
 // === MAIN MESSAGE HANDLER ===
 bot.on('message', async (msg) => {
@@ -729,111 +559,76 @@ bot.on('message', async (msg) => {
     return;
   }
 
-  const text = msg.text;
+  const textRaw = msg.text;
+  if (textRaw?.startsWith('/') || msg.contact) return;
 
-  // гарантируем сессию даже если пользователь не нажал /start
-  let session = sessions.get(chatId);
-  if (!session) {
-    session = {
-      stage: 'greeting',
-      context: [],
-      brief: {
-        telegramUsername: msg.from?.username || null,
-        firstName: msg.from?.first_name || null,
-        phone: null,
-        email: null,
-        companyName: null,
-        companyBusiness: null,
-        city: null,
-        targetAudience: null,
-        task: null,
-        season: null
-      },
-      calculatorShown: false,
-      contactShared: false,
-      managerCalled: false,
-      managerNotifiedAt: null,
-      lastVisualKey: null,
-      lastVisualAt: 0
-    };
-    sessions.set(chatId, session);
-  }
+  const text = normText(textRaw);
+  const session = ensureSession(chatId, msg);
 
+  // anti-duplicate
+  const msgId = Number(msg.message_id || 0);
+  if (msgId && session.lastUserMsgId === msgId) return;
 
-  // не трогаем команды и контакт (у них свои обработчики)
-  if (text?.startsWith('/') || msg.contact) return;
-
-  // Быстрый режим аудио по триггерам (не ломая диалог)
-  if (shouldOfferAudioByTriggers(text)) {
-    try {
-      await offerAudioIfNeeded(chatId);
-    } catch (err) {
-      console.error('❌ Ошибка offerAudioIfNeeded:', err.message);
+  if (text && session.lastUserText && normLower(text) === normLower(session.lastUserText)) {
+    if (nowMs() - (session.lastUserAt || 0) < 12_000) {
+      session.lastUserMsgId = msgId;
+      sessions.set(chatId, session);
+      return;
     }
   }
 
-  // === MENU BUTTONS (новая концепция) ===
+  session.lastUserText = text || null;
+  session.lastUserAt = nowMs();
+  session.lastUserMsgId = msgId;
+  sessions.set(chatId, session);
+
+  // === GLOBAL NAV ===
+  if (text === '↩️ В меню') {
+    await bot.sendMessage(chatId, 'Меню 👇', { reply_markup: MAIN_KEYBOARD });
+    return;
+  }
+
+  // === MENU BUTTONS ===
   if (text === '📺 О портале PTK') {
     const keyboard = {
-      inline_keyboard: [[
-        {
-          text: 'Открыть',
-          web_app: { url: `${PUBLIC_BASE_URL}/partner.html` }
-        }
-      ]]
+      inline_keyboard: [[{ text: 'Открыть', web_app: { url: `${PUBLIC_BASE_URL}/partner.html` } }]]
     };
-
-    await bot.sendMessage(chatId, '📺 Портал PTK — навигатор выбора путешествий 👇', {
-      reply_markup: keyboard
-    });
+    await bot.sendMessage(chatId, '📺 Портал PTK — навигатор выбора путешествий 👇', { reply_markup: keyboard });
     return;
   }
 
   if (text === '🧭 Стать партнёром маршрутов') {
     const keyboard = {
-      inline_keyboard: [[
-        {
-          text: 'Открыть витрину партнёрства',
-          web_app: { url: `${PUBLIC_BASE_URL}/partner.html` } // сделай страницу partner.html в public
-        }
-      ]]
+      inline_keyboard: [[{ text: 'Открыть витрину партнёрства', web_app: { url: `${PUBLIC_BASE_URL}/partner.html` } }]]
     };
 
     await bot.sendMessage(
       chatId,
-      '🧭 Здесь не “размещение”. Здесь — роль в маршрутах, где люди уже выбирают.\n\nОткрываем витрину 👇',
+      '🧭 Здесь не “размещение”. Здесь — роль в маршрутах, где люди уже выбирают.\n\nОткрываю витрину 👇',
       { reply_markup: keyboard }
     );
 
-    // опорная картинка “экосистема”
     await sendVisualIfNeeded(chatId, 'ecosystem', session);
     return;
   }
 
   if (text === '🧮 Посчитать роль и бюджет') {
     const keyboard = {
-      inline_keyboard: [[
-        {
-          text: 'Открыть калькулятор',
-          web_app: { url: `${PUBLIC_BASE_URL}/calculator.html` }
-        }
-      ]]
+      inline_keyboard: [[{ text: 'Открыть калькулятор', web_app: { url: `${PUBLIC_BASE_URL}/calculator.html` } }]]
     };
-
-    await bot.sendMessage(chatId, '🧮 Давайте прикинем роль и бюджет без гаданий 👇', {
-      reply_markup: keyboard
-    });
+    await bot.sendMessage(chatId, '🧮 Давайте прикинем роль и бюджет без гаданий 👇', { reply_markup: keyboard });
     return;
   }
 
   if (text === '🎬 Как это работает (2 минуты)') {
     await bot.sendMessage(
       chatId,
-      'Смотрите.\nРеклама — это когда вас прерывают.\nА мы делаем так, что вас выбирают.\n\nПредставьте: человек планирует поездку. Он читает подборку маршрутов — и вы там не как баннер, а как логичная часть путешествия.\nВ этот момент вы уже не «вариант», вы — решение.'
+      'Коротко: мы не прерываем человека рекламой — мы становимся частью его выбора.\n\nХотите: 🎧 послушать фрагмент (2 минуты) или 📝 объясню в двух словах?'
     );
-
     await sendVisualIfNeeded(chatId, 'choice', session);
-    await offerAudioIfNeeded(chatId);
+    session.stage = 'await_explain_choice';
+    sessions.set(chatId, session);
+    await askExplainChoice(chatId);
     return;
   }
 
@@ -842,95 +637,149 @@ bot.on('message', async (msg) => {
       keyboard: [
         [{ text: '📱 Поделиться контактом', request_contact: true }],
         [{ text: '✍️ Написать телефон вручную' }],
-        [{ text: '↩️ Назад в меню' }]
+        [{ text: '↩️ В меню' }]
       ],
       resize_keyboard: true,
       one_time_keyboard: true
     };
-
-    await bot.sendMessage(chatId, 'Ок. Чтобы продюсер не потерял вас — дайте контакт 👇', {
-      reply_markup: keyboard
-    });
+    session.stage = 'await_contact';
+    sessions.set(chatId, session);
+    await bot.sendMessage(chatId, 'Ок. Чтобы продюсер не потерял вас — дайте контакт 👇', { reply_markup: keyboard });
     return;
   }
 
-  if (text === '↩️ Назад в меню') {
-    await bot.sendMessage(chatId, 'Меню 👇', { reply_markup: MAIN_KEYBOARD });
-    return;
-  }
+  // === STAGE: contact manual ===
+  if (!session.contactShared && session.stage === 'await_contact') {
+    const phoneRegex =
+      /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,12}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  // === SESSION ===
-  session = sessions.get(chatId) || {
-    stage: 'greeting',
-    context: [],
-    brief: {
-      telegramUsername: msg.from.username || null,
-      firstName: msg.from.first_name || null,
-      phone: null,
-      email: null
-    },
-    calculatorShown: false,
-    contactShared: false,
-    managerCalled: false,
-    managerNotifiedAt: null
-  };
-
-  try {
-    // если контакт ещё не получали — ловим телефон/email
-    if (!session.contactShared && session.stage === 'greeting') {
-      const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/;
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-      if (typeof text === 'string' && phoneRegex.test(text.replace(/\s/g, ''))) {
-        session.brief.phone = text.replace(/\s/g, '');
-        session.contactShared = true;
-
-        await bot.sendMessage(chatId, `Отлично! Записал ✅`, { reply_markup: MAIN_KEYBOARD });
-        await new Promise(resolve => setTimeout(resolve, 800));
-        await bot.sendMessage(chatId, `Супер. Теперь скажите: вы кто по формату — отель/объект/регион/сервис?`, {
-          reply_markup: MAIN_KEYBOARD
-        });
-
-        const managerChatId = process.env.MANAGER_CHAT_ID;
-        if (managerChatId) {
-          await bot.sendMessage(
-            managerChatId,
-            `📞 НОВЫЙ КОНТАКТ\n\nИмя: ${msg.from.first_name}\nТелефон: ${session.brief.phone}\nTelegram: @${msg.from.username || 'нет'}`
-          );
-        }
-
-        sessions.set(chatId, session);
-        return;
-      }
-
-      if (typeof text === 'string' && emailRegex.test(text)) {
-        session.brief.email = text;
-        session.contactShared = true;
-
-        await bot.sendMessage(chatId, `Отлично! Записал ✅`, { reply_markup: MAIN_KEYBOARD });
-        await new Promise(resolve => setTimeout(resolve, 800));
-        await bot.sendMessage(chatId, `Супер. Теперь скажите: вы кто по формату — отель/объект/регион/сервис?`, {
-          reply_markup: MAIN_KEYBOARD
-        });
-
-        const managerChatId = process.env.MANAGER_CHAT_ID;
-        if (managerChatId) {
-          await bot.sendMessage(
-            managerChatId,
-            `📧 НОВЫЙ КОНТАКТ\n\nИмя: ${msg.from.first_name}\nEmail: ${session.brief.email}\nTelegram: @${msg.from.username || 'нет'}`
-          );
-        }
-
-        sessions.set(chatId, session);
-        return;
-      }
-
-      if (text?.toLowerCase() === '✍️ написать вручную' || text === '✍️ Написать телефон вручную') {
-        await bot.sendMessage(chatId, 'Напишите телефон или email:', { reply_markup: MAIN_KEYBOARD });
-        return;
-      }
+    if (text === '✍️ Написать вручную' || text === '✍️ Написать телефон вручную') {
+      await bot.sendMessage(chatId, 'Напишите телефон или email:', { reply_markup: MAIN_KEYBOARD });
+      return;
     }
 
+    if (phoneRegex.test(text.replace(/\s/g, ''))) {
+      session.brief.phone = text.replace(/\s/g, '');
+      session.contactShared = true;
+      session.stage = 'await_understanding';
+      sessions.set(chatId, session);
+
+      await bot.sendMessage(chatId, 'Отлично! Записал ✅', { reply_markup: MAIN_KEYBOARD });
+      await new Promise(resolve => setTimeout(resolve, 600));
+      await askUnderstanding(chatId);
+
+      const managerChatId = process.env.MANAGER_CHAT_ID;
+      if (managerChatId) {
+        await bot.sendMessage(
+          managerChatId,
+          `📞 НОВЫЙ КОНТАКТ\n\nИмя: ${msg.from.first_name}\nТелефон: ${session.brief.phone}\nTelegram: @${msg.from.username || 'нет'}\nID: ${chatId}`
+        );
+      }
+      return;
+    }
+
+    if (emailRegex.test(text)) {
+      session.brief.email = text;
+      session.contactShared = true;
+      session.stage = 'await_understanding';
+      sessions.set(chatId, session);
+
+      await bot.sendMessage(chatId, 'Отлично! Записал ✅', { reply_markup: MAIN_KEYBOARD });
+      await new Promise(resolve => setTimeout(resolve, 600));
+      await askUnderstanding(chatId);
+
+      const managerChatId = process.env.MANAGER_CHAT_ID;
+      if (managerChatId) {
+        await bot.sendMessage(
+          managerChatId,
+          `📧 НОВЫЙ КОНТАКТ\n\nИмя: ${msg.from.first_name}\nEmail: ${session.brief.email}\nTelegram: @${msg.from.username || 'нет'}\nID: ${chatId}`
+        );
+      }
+      return;
+    }
+  }
+
+  // === STAGE: understanding ===
+  if (session.stage === 'await_understanding') {
+    if (isYes(text)) {
+      session.stage = 'awaiting_business';
+      sessions.set(chatId, session);
+      await askBusinessType(chatId);
+      return;
+    }
+    if (isNo(text)) {
+      session.stage = 'await_explain_choice';
+      sessions.set(chatId, session);
+      await askExplainChoice(chatId);
+      return;
+    }
+
+    await askUnderstanding(chatId);
+    return;
+  }
+
+  // === STAGE: explain choice ===
+  if (session.stage === 'await_explain_choice') {
+    if (text === '🎧 Послушаю 2 минуты' || isAudioIntent(text)) {
+      await sendAudioExplain(chatId);
+      session.stage = 'awaiting_business';
+      sessions.set(chatId, session);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await askBusinessType(chatId);
+      return;
+    }
+
+    if (text === '📝 В двух словах') {
+      await explainInTwoWords(chatId);
+      session.stage = 'awaiting_business';
+      sessions.set(chatId, session);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await askBusinessType(chatId);
+      return;
+    }
+
+    if (isNo(text)) {
+      await explainInTwoWords(chatId);
+      session.stage = 'awaiting_business';
+      sessions.set(chatId, session);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await askBusinessType(chatId);
+      return;
+    }
+
+    await askExplainChoice(chatId);
+    return;
+  }
+
+  // === STAGE: business type quick buttons ===
+  if (session.stage === 'awaiting_business') {
+    const s = normLower(text);
+    if (s.includes('отел') || s.includes('курорт')) session.brief.companyBusiness = 'отель';
+    else if (s.includes('объект') || s.includes('актив')) session.brief.companyBusiness = 'объект';
+    else if (s.includes('регион') || s.includes('город')) session.brief.companyBusiness = 'регион';
+    else if (s.includes('бренд') || s.includes('сервис')) session.brief.companyBusiness = 'бренд/сервис';
+
+    session.stage = 'chat';
+    sessions.set(chatId, session);
+  }
+
+  // === AUDIO ANYTIME ===
+  if (isAudioIntent(text)) {
+    await sendAudioExplain(chatId);
+    return;
+  }
+
+  // === CONFUSION ANYTIME ===
+  if (shouldOfferAudioByTriggers(text)) {
+    session.stage = 'await_explain_choice';
+    sessions.set(chatId, session);
+    await askExplainChoice(chatId);
+    return;
+  }
+
+  // === AI DIALOGUE ===
+  try {
     await bot.sendChatAction(chatId, 'typing');
 
     const contextToSend = session.context.slice(-12);
@@ -941,7 +790,6 @@ bot.on('message', async (msg) => {
       { role: 'assistant', content: aiResponse.message || '' }
     );
 
-    // merge brief
     if (aiResponse.brief) {
       Object.keys(aiResponse.brief).forEach(key => {
         if (aiResponse.brief[key] && aiResponse.brief[key] !== 'null') {
@@ -950,12 +798,6 @@ bot.on('message', async (msg) => {
       });
     }
 
-    // offer audio if AI decided so
-    if (aiResponse.offerAudio === true) {
-      await offerAudioIfNeeded(chatId);
-    }
-
-    // escalation
     if (aiResponse.confidence < 0.3) {
       const managerUsername = process.env.MANAGER_USERNAME;
       const keyboard = managerUsername
@@ -964,128 +806,48 @@ bot.on('message', async (msg) => {
 
       await bot.sendMessage(
         chatId,
-        `Понял. Давайте не гадать — передам продюсеру, он уточнит детали и предложит лучший заход.`,
+        'Понял. Давайте не гадать — передам продюсеру, он уточнит детали и предложит лучший заход.',
         keyboard ? { reply_markup: keyboard } : undefined
       );
-
-      const managerChatId = process.env.MANAGER_CHAT_ID;
-      if (managerChatId) {
-        const brief = session.brief;
-        const context = session.context
-          .slice(-10)
-          .map(m => {
-            const role = m.role === 'user' ? '👤' : '🤖';
-            return `${role} ${String(m.content || '').substring(0, 200)}`;
-          })
-          .join('\n\n');
-
-        const briefMessage =
-          `🔔 ЭСКАЛАЦИЯ\n\n` +
-          `👤 ${brief.firstName || 'без имени'}\n` +
-          `📱 ${brief.phone || 'нет'}\n` +
-          `💬 @${brief.telegramUsername || 'нет'}\n\n` +
-          `🏢 ${brief.companyName || '?'}\n` +
-          `💼 ${brief.companyBusiness || '?'}\n` +
-          `📍 ${brief.city || '?'}\n` +
-          `🎯 ${brief.task || '?'}\n` +
-          `🗓️ ${brief.season || '?'}\n\n` +
-          `Диалог:\n${context}`;
-
-        const managerKeyboard = {
-          inline_keyboard: [[
-            {
-              text: '💬 Ответить',
-              url: msg.from.username ? `https://t.me/${msg.from.username}` : `tg://user?id=${chatId}`
-            }
-          ]]
-        };
-
-        try {
-          await bot.sendMessage(managerChatId, briefMessage, { reply_markup: managerKeyboard });
-        } catch (err) {
-          console.error('Failed to send manager notification:', err);
-        }
-      }
 
       sessions.set(chatId, session);
       return;
     }
 
-    // main answer
     if (aiResponse.message) {
-      await bot.sendMessage(chatId, aiResponse.message, { reply_markup: MAIN_KEYBOARD });
+      const finalText = deRepeatOpener(aiResponse.message, session);
+      session.lastBotText = finalText;
+      session.lastBotAt = nowMs();
+      sessions.set(chatId, session);
+
+      await bot.sendMessage(chatId, finalText, { reply_markup: MAIN_KEYBOARD });
     }
 
-    // visual as continuation (max 1)
     await sendVisualIfNeeded(chatId, aiResponse.visualKey, session);
 
-    // calculator suggestion
     if (aiResponse.readyForCalculator === true && !session.calculatorShown) {
       session.calculatorShown = true;
       sessions.set(chatId, session);
 
-      await new Promise(resolve => setTimeout(resolve, 900));
+      await new Promise(resolve => setTimeout(resolve, 700));
       await bot.sendMessage(
         chatId,
-        'Ок, давайте прикинем роль и бюджет. Жмите “🧮 Посчитать роль и бюджет” — калькулятор откроется сразу. 👇',
+        'Ок, у нас уже есть основа. Если хотите — прикинем роль и бюджет: нажмите “🧮 Посчитать роль и бюджет”.',
         { reply_markup: MAIN_KEYBOARD }
       );
-
-      const managerChatId = process.env.MANAGER_CHAT_ID;
-      if (managerChatId) {
-        const brief = session.brief;
-
-        const urgentMessage =
-          `🚨 ГОРЯЧИЙ ЛИД!\n\n` +
-          `👤 ${brief.firstName || 'Не указано'}\n` +
-          `📱 ${brief.phone || 'НЕТ'}\n` +
-          `💬 @${brief.telegramUsername || 'нет'}\n\n` +
-          `🏢 ${brief.companyName || '?'}\n` +
-          `💼 ${brief.companyBusiness || '?'}\n` +
-          `📍 ${brief.city || '?'}\n` +
-          `🎯 ${brief.task || '?'}\n` +
-          `🗓️ ${brief.season || '?'}\n\n` +
-          `🔥 ЗВОНИТЬ СРОЧНО!`;
-
-        const urgentKeyboard = {
-          inline_keyboard: [
-            [
-              {
-                text: '💬 Написать клиенту',
-                url: brief.telegramUsername ? `https://t.me/${brief.telegramUsername}` : `tg://user?id=${chatId}`
-              }
-            ],
-            [
-              { text: '✅ Я позвонил', callback_data: `called_${chatId}` },
-              { text: '🎉 Сделка закрыта', callback_data: `closed_${chatId}` }
-            ]
-          ]
-        };
-
-        try {
-          await bot.sendMessage(managerChatId, urgentMessage, { reply_markup: urgentKeyboard });
-          session.managerNotifiedAt = Date.now();
-          sessions.set(chatId, session);
-
-          setTimeout(() => {
-            const currentSession = sessions.get(chatId);
-            if (currentSession && !currentSession.managerCalled) {
-              sendReminderToManager(chatId, currentSession.brief);
-            }
-          }, 15 * 60 * 1000);
-        } catch (err) {
-          console.error('❌ Ошибка отправки менеджеру:', err.message);
-        }
-      }
     }
 
     sessions.set(chatId, session);
-  } catch (err) {
-    console.error('Ошибка обработки сообщения:', err);
-    await bot.sendMessage(chatId, 'Произошла ошибка 😅 Попробуйте ещё раз или напишите /start', {
-      reply_markup: MAIN_KEYBOARD
-    });
+  } catch (error) {
+    console.error('❌ Ошибка обработки сообщения:', error.message);
+    await bot.sendMessage(
+      chatId,
+      'Поймал технический сбой 😅 Давайте по-простому: оставьте контакт — продюсер быстро всё разложит.',
+      { reply_markup: MAIN_KEYBOARD }
+    );
   }
 });
 
-console.log('🤖 Bot started!');
+// === START SERVER ===
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
