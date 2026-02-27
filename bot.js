@@ -104,6 +104,10 @@ function ensureSession(chatId, msg) {
   if (session) return session;
 
   session = {
+        turns: 0,                 // сколько осмысленных “ходов” диалога уже было
+    loopHits: 0,              // сколько раз подряд заметили повтор
+    lastAIPrefix: null,       // первые ~120 символов прошлого ответа (для детекта повтора)
+    hardStop: false,          // если true — AI не болтает, только ведёт к контакту/калькулятору
     stage: 'greeting', // greeting | await_contact | await_understanding | await_explain_choice | awaiting_business | chat
     context: [],
     brief: {
@@ -581,6 +585,323 @@ bot.on('message', async (msg) => {
   session.lastUserAt = nowMs();
   session.lastUserMsgId = msgId;
   sessions.set(chatId, session);
+
+  // === GLOBAL NAV ===
+  if (text === '↩️ В меню') {
+    await bot.sendMessage(chatId, 'Меню 👇', { reply_markup: MAIN_KEYBOARD });
+    return;
+  }
+
+  // === MENU BUTTONS ===
+  if (text === '📺 О портале PTK') {
+    const keyboard = {
+      inline_keyboard: [[{ text: 'Открыть', web_app: { url: `${PUBLIC_BASE_URL}/partner.html` } }]]
+    };
+    await bot.sendMessage(chatId, '📺 Портал PTK — навигатор выбора путешествий 👇', { reply_markup: keyboard });
+    return;
+  }
+
+  if (text === '🧭 Стать партнёром маршрутов') {
+    const keyboard = {
+      inline_keyboard: [[{ text: 'Открыть витрину партнёрства', web_app: { url: `${PUBLIC_BASE_URL}/partner.html` } }]]
+    };
+
+    await bot.sendMessage(
+      chatId,
+      '🧭 Здесь не “размещение”. Здесь — роль в маршрутах, где люди уже выбирают.\n\nОткрываю витрину 👇',
+      { reply_markup: keyboard }
+    );
+
+    await sendVisualIfNeeded(chatId, 'ecosystem', session);
+    return;
+  }
+
+  if (text === '🧮 Посчитать роль и бюджет') {
+    const keyboard = {
+      inline_keyboard: [[{ text: 'Открыть калькулятор', web_app: { url: `${PUBLIC_BASE_URL}/calculator.html` } }]]
+    };
+    await bot.sendMessage(chatId, '🧮 Давайте прикинем роль и бюджет без гаданий 👇', { reply_markup: keyboard });
+    return;
+  }
+
+  if (text === '🎬 Как это работает (2 минуты)') {
+    await bot.sendMessage(
+      chatId,
+      'Коротко: мы не прерываем человека рекламой — мы становимся частью его выбора.\n\nХотите: 🎧 послушать фрагмент (2 минуты) или 📝 объясню в двух словах?'
+    );
+    await sendVisualIfNeeded(chatId, 'choice', session);
+    session.stage = 'await_explain_choice';
+    sessions.set(chatId, session);
+    await askExplainChoice(chatId);
+    return;
+  }
+
+  if (text === '📞 Передать контакт продюсеру') {
+    const keyboard = {
+      keyboard: [
+        [{ text: '📱 Поделиться контактом', request_contact: true }],
+        [{ text: '✍️ Написать телефон вручную' }],
+        [{ text: '↩️ В меню' }]
+      ],
+      resize_keyboard: true,
+      one_time_keyboard: true
+    };
+    session.stage = 'await_contact';
+    session.hardStop = true; // тут точно не болтаем
+    sessions.set(chatId, session);
+    await bot.sendMessage(chatId, 'Ок. Чтобы продюсер не потерял вас — дайте контакт 👇', { reply_markup: keyboard });
+    return;
+  }
+
+  // === STAGE: contact manual ===
+  if (!session.contactShared && session.stage === 'await_contact') {
+    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,12}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (text === '✍️ Написать вручную' || text === '✍️ Написать телефон вручную') {
+      await bot.sendMessage(chatId, 'Напишите телефон или email:', { reply_markup: MAIN_KEYBOARD });
+      return;
+    }
+
+    if (phoneRegex.test(text.replace(/\s/g, ''))) {
+      session.brief.phone = text.replace(/\s/g, '');
+      session.contactShared = true;
+      session.stage = 'await_understanding';
+      session.hardStop = false;
+      session.turns = 0;
+      session.loopHits = 0;
+      session.lastAIPrefix = null;
+      sessions.set(chatId, session);
+
+      await bot.sendMessage(chatId, 'Отлично! Записал ✅', { reply_markup: MAIN_KEYBOARD });
+      await new Promise(resolve => setTimeout(resolve, 600));
+      await askUnderstanding(chatId);
+
+      const managerChatId = process.env.MANAGER_CHAT_ID;
+      if (managerChatId) {
+        await bot.sendMessage(
+          managerChatId,
+          `📞 НОВЫЙ КОНТАКТ\n\nИмя: ${msg.from.first_name}\nТелефон: ${session.brief.phone}\nTelegram: @${msg.from.username || 'нет'}\nID: ${chatId}`
+        );
+      }
+      return;
+    }
+
+    if (emailRegex.test(text)) {
+      session.brief.email = text;
+      session.contactShared = true;
+      session.stage = 'await_understanding';
+      session.hardStop = false;
+      session.turns = 0;
+      session.loopHits = 0;
+      session.lastAIPrefix = null;
+      sessions.set(chatId, session);
+
+      await bot.sendMessage(chatId, 'Отлично! Записал ✅', { reply_markup: MAIN_KEYBOARD });
+      await new Promise(resolve => setTimeout(resolve, 600));
+      await askUnderstanding(chatId);
+
+      const managerChatId = process.env.MANAGER_CHAT_ID;
+      if (managerChatId) {
+        await bot.sendMessage(
+          managerChatId,
+          `📧 НОВЫЙ КОНТАКТ\n\nИмя: ${msg.from.first_name}\nEmail: ${session.brief.email}\nTelegram: @${msg.from.username || 'нет'}\nID: ${chatId}`
+        );
+      }
+      return;
+    }
+
+    // если человек пишет что-то левое на шаге контакта — мягко возвращаем
+    await bot.sendMessage(chatId, 'Чтобы не потеряться: отправьте телефон/email или нажмите “Поделиться контактом”.', {
+      reply_markup: MAIN_KEYBOARD
+    });
+    return;
+  }
+
+  // === STAGE: understanding ===
+  if (session.stage === 'await_understanding') {
+    if (isYes(text)) {
+      session.stage = 'awaiting_business';
+      sessions.set(chatId, session);
+      await askBusinessType(chatId);
+      return;
+    }
+    if (isNo(text)) {
+      session.stage = 'await_explain_choice';
+      sessions.set(chatId, session);
+      await askExplainChoice(chatId);
+      return;
+    }
+    await askUnderstanding(chatId);
+    return;
+  }
+
+  // === STAGE: explain choice ===
+  if (session.stage === 'await_explain_choice') {
+    if (text === '🎧 Послушаю 2 минуты' || isAudioIntent(text)) {
+      await sendAudioExplain(chatId);
+      session.stage = 'awaiting_business';
+      sessions.set(chatId, session);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await askBusinessType(chatId);
+      return;
+    }
+
+    if (text === '📝 В двух словах' || isNo(text)) {
+      await explainInTwoWords(chatId);
+      session.stage = 'awaiting_business';
+      sessions.set(chatId, session);
+      await new Promise(resolve => setTimeout(resolve, 500));
+      await askBusinessType(chatId);
+      return;
+    }
+
+    await askExplainChoice(chatId);
+    return;
+  }
+
+  // === STAGE: business type ===
+  if (session.stage === 'awaiting_business') {
+    const s = normLower(text);
+    if (s.includes('отел') || s.includes('курорт')) session.brief.companyBusiness = 'отель';
+    else if (s.includes('объект') || s.includes('актив')) session.brief.companyBusiness = 'объект';
+    else if (s.includes('регион') || s.includes('город')) session.brief.companyBusiness = 'регион';
+    else if (s.includes('бренд') || s.includes('сервис')) session.brief.companyBusiness = 'бренд/сервис';
+
+    session.stage = 'chat';
+    session.turns = 0;
+    session.loopHits = 0;
+    session.lastAIPrefix = null;
+    sessions.set(chatId, session);
+    // дальше идём в обычный диалог
+  }
+
+  // === AUDIO ANYTIME ===
+  if (isAudioIntent(text)) {
+    await sendAudioExplain(chatId);
+    return;
+  }
+
+  // === HARD STOP MODE (не болтаем, ведём к контакту/калькулятору) ===
+  if (session.hardStop === true) {
+    await bot.sendMessage(
+      chatId,
+      'Ок. Чтобы не гонять слова: нажмите “📞 Передать контакт продюсеру” или “🧮 Посчитать роль и бюджет”.',
+      { reply_markup: MAIN_KEYBOARD }
+    );
+    return;
+  }
+
+  // === TURN LIMIT (срезаем бесконечную болтовню) ===
+  const MAX_TURNS = 6;
+  if (session.turns >= MAX_TURNS) {
+    session.hardStop = true;
+    sessions.set(chatId, session);
+
+    await bot.sendMessage(
+      chatId,
+      'Ок, я картину собрал. Дальше два варианта — чтобы это превратилось в договор, а не в беседу:\n\n1) 🧮 “Посчитать роль и бюджет”\n2) 📞 “Передать контакт продюсеру”\n\nКак удобнее?',
+      { reply_markup: MAIN_KEYBOARD }
+    );
+    return;
+  }
+
+  // === AI DIALOGUE ===
+  try {
+    await bot.sendChatAction(chatId, 'typing');
+
+    const contextToSend = session.context.slice(-12);
+    const aiResponse = await analyzeMessage(text, contextToSend);
+
+    // turn count ↑ только на реальном AI-ходе
+    session.turns += 1;
+
+    // loop guard: если модель повторяет одно и то же
+    const prefix = normLower(String(aiResponse.message || '').slice(0, 120));
+    const prevPrefix = normLower(String(session.lastAIPrefix || '').slice(0, 120));
+
+    if (prefix && prevPrefix && prefix === prevPrefix) {
+      session.loopHits += 1;
+    } else {
+      session.loopHits = 0;
+    }
+    session.lastAIPrefix = prefix || null;
+
+    // если два повтора подряд — не шлём повтор, а закрываем в контакт/калькулятор
+    if (session.loopHits >= 1) {
+      session.hardStop = true;
+      sessions.set(chatId, session);
+      await bot.sendMessage(
+        chatId,
+        'Понял. Чтобы не повторяться и не жевать одно и то же: давайте зафиксируем всё в расчёте или передадим продюсеру.',
+        { reply_markup: MAIN_KEYBOARD }
+      );
+      return;
+    }
+
+    session.context.push(
+      { role: 'user', content: text },
+      { role: 'assistant', content: aiResponse.message || '' }
+    );
+
+    if (aiResponse.brief) {
+      Object.keys(aiResponse.brief).forEach(key => {
+        if (aiResponse.brief[key] && aiResponse.brief[key] !== 'null') {
+          session.brief[key] = aiResponse.brief[key];
+        }
+      });
+    }
+
+    if (aiResponse.confidence < 0.3) {
+      const managerUsername = process.env.MANAGER_USERNAME;
+      const keyboard = managerUsername
+        ? { inline_keyboard: [[{ text: '💬 Написать продюсеру', url: `https://t.me/${managerUsername}` }]] }
+        : undefined;
+
+      session.hardStop = true;
+      sessions.set(chatId, session);
+
+      await bot.sendMessage(
+        chatId,
+        'Давайте не гадать — передам продюсеру, он быстро уточнит детали и предложит лучший заход.',
+        keyboard ? { reply_markup: keyboard } : undefined
+      );
+      return;
+    }
+
+    if (aiResponse.message) {
+      const finalText = deRepeatOpener(aiResponse.message, session);
+      session.lastBotText = finalText;
+      session.lastBotAt = nowMs();
+      sessions.set(chatId, session);
+
+      await bot.sendMessage(chatId, finalText, { reply_markup: MAIN_KEYBOARD });
+    }
+
+    await sendVisualIfNeeded(chatId, aiResponse.visualKey, session);
+
+    if (aiResponse.readyForCalculator === true && !session.calculatorShown) {
+      session.calculatorShown = true;
+      sessions.set(chatId, session);
+
+      await new Promise(resolve => setTimeout(resolve, 600));
+      await bot.sendMessage(
+        chatId,
+        'Ок, база есть. Чтобы быстро перейти к цифрам — нажмите “🧮 Посчитать роль и бюджет”.',
+        { reply_markup: MAIN_KEYBOARD }
+      );
+    }
+
+    sessions.set(chatId, session);
+  } catch (error) {
+    console.error('❌ Ошибка обработки сообщения:', error.message);
+    await bot.sendMessage(
+      chatId,
+      'Поймал технический сбой 😅 Давайте по-простому: оставьте контакт — продюсер быстро всё разложит.',
+      { reply_markup: MAIN_KEYBOARD }
+    );
+  }
+});
 
   // === GLOBAL NAV ===
   if (text === '↩️ В меню') {
