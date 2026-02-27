@@ -624,7 +624,7 @@ bot.on('message', async (msg) => {
       inline_keyboard: [[
         {
           text: 'Открыть',
-          web_app: { url: `${PUBLIC_BASE_URL}/about.html` }
+          web_app: { url: `${PUBLIC_BASE_URL}/partner.html` }
         }
       ]]
     };
