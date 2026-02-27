@@ -1,7 +1,8 @@
 // bot.js - Главный файл бота
 import dotenv from 'dotenv';
 dotenv.config();
-
+console.log("BOOT FILE:", import.meta.url);
+console.log("BOOT MARK:", "BOTJS_REAL_2026_02_27");
 import TelegramBot from 'node-telegram-bot-api';
 import express from 'express';
 import { analyzeMessage } from './agent.js';
